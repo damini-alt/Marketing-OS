@@ -1,0 +1,774 @@
+﻿{
+  "created": "1778740521920",
+  "updated": "1778740521920",
+  "name": "Broadcast Manager(V1-M-OS)",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@puchoaistudio/tool-webhook",
+    "@puchoaistudio/tool-http",
+    "@puchoaistudio/tool-google-sheets"
+  ],
+  "template": {
+    "displayName": "Broadcast Manager(V1-M-OS)",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "propertySettings": {
+          "authType": {
+            "type": "MANUAL"
+          },
+          "authFields": {
+            "type": "MANUAL",
+            "schema": {}
+          },
+          "liveMarkdown": {
+            "type": "MANUAL"
+          },
+          "syncMarkdown": {
+            "type": "MANUAL"
+          },
+          "testMarkdown": {
+            "type": "MANUAL"
+          }
+        },
+        "pieceName": "@puchoaistudio/tool-webhook",
+        "pieceVersion": "2.0.4",
+        "input": {
+          "authType": "none",
+          "authFields": {}
+        },
+        "sampleData": {},
+        "triggerName": "catch_webhook"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "skip": false,
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {
+            "phones": "{{trigger['body']['phones']}}",
+            "message": "{{trigger['body']['message']}}",
+            "segment": "{{trigger['body']['segment']}}",
+            "campaignId": "{{trigger['body']['campaign_id']}}",
+            "webhookUrl": "{{trigger['body']['webhook_url']}}",
+            "broadcastId": "{{trigger['body']['broadcast_id']}}",
+            "scheduledDate": "{{trigger['body']['scheduled_date']}}",
+            "scheduledTime": "{{trigger['body']['scheduled_time']}}"
+          },
+          "sampleData": {},
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n  const timestamp = Date.now();\n  const broadcastId = inputs.broadcastId || `BCAST-${timestamp.toString().slice(-6)}`;\n  \n  return {\n    broadcast_id: broadcastId,\n    campaign_id: inputs.campaignId || '',\n    segment: inputs.segment || 'new_leads',\n    message: inputs.message || '',\n    scheduled_date: inputs.scheduledDate || new Date().toISOString().split('T')[0],\n    scheduled_time: inputs.scheduledTime || '10:00',\n    webhook_url: inputs.webhookUrl || '',\n    phones: inputs.phones || [],\n    status: 'scheduled',\n    total_sent: 0,\n    delivered: 0,\n    responses: 0\n  };\n};",
+            "packageJson": "{}"
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_3",
+          "skip": false,
+          "type": "LOOP_ON_ITEMS",
+          "valid": true,
+          "settings": {
+            "items": "{{step_1['phones']}}",
+            "sampleData": {}
+          },
+          "displayName": "Loop on Items",
+          "firstLoopAction": {
+            "name": "step_7",
+            "skip": false,
+            "type": "ROUTER",
+            "valid": true,
+            "children": [
+              {
+                "name": "step_8",
+                "skip": false,
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "url": "https://httpbin.org/post",
+                    "body": {
+                      "data": {
+                        "phones": "{{step_3['item']}}",
+                        "message": "{{step_1['message']}}",
+                        "segment": "{{step_1['segment']}}",
+                        "broadcast_id": "{{step_1['broadcast_id']}}"
+                      }
+                    },
+                    "method": "POST",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "authType": "NONE",
+                    "stopFlow": false,
+                    "body_type": "json",
+                    "use_proxy": false,
+                    "authFields": {},
+                    "failureMode": "continue_none",
+                    "queryParams": {},
+                    "proxy_settings": {},
+                    "response_is_binary": false
+                  },
+                  "pieceName": "@puchoaistudio/tool-http",
+                  "actionName": "send_request",
+                  "sampleData": {},
+                  "pieceVersion": "2.0.0",
+                  "propertySettings": {
+                    "url": {
+                      "type": "MANUAL"
+                    },
+                    "body": {
+                      "type": "MANUAL",
+                      "schema": {
+                        "data": {
+                          "type": "JSON",
+                          "required": true,
+                          "displayName": "JSON Body"
+                        }
+                      }
+                    },
+                    "method": {
+                      "type": "MANUAL"
+                    },
+                    "headers": {
+                      "type": "MANUAL"
+                    },
+                    "timeout": {
+                      "type": "MANUAL"
+                    },
+                    "authType": {
+                      "type": "MANUAL"
+                    },
+                    "stopFlow": {
+                      "type": "MANUAL"
+                    },
+                    "body_type": {
+                      "type": "MANUAL"
+                    },
+                    "use_proxy": {
+                      "type": "MANUAL"
+                    },
+                    "authFields": {
+                      "type": "MANUAL",
+                      "schema": {}
+                    },
+                    "failureMode": {
+                      "type": "MANUAL"
+                    },
+                    "queryParams": {
+                      "type": "MANUAL"
+                    },
+                    "proxy_settings": {
+                      "type": "MANUAL",
+                      "schema": {}
+                    },
+                    "response_is_binary": {
+                      "type": "MANUAL"
+                    }
+                  },
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_9",
+                  "skip": false,
+                  "type": "CODE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "httpResponse": "{{step_2['body']}}",
+                      "broadcastData": "{{step_1}}"
+                    },
+                    "sampleData": {},
+                    "sourceCode": {
+                      "code": "export const code = async (inputs) => {\n  const broadcast = inputs.broadcastData;\n  const response = inputs.httpResponse;\n  \n  const phones = Array.isArray(broadcast.phones) ? broadcast.phones : [];\n  const totalSent = phones.length;\n  \n  return {\n    ...broadcast,\n    status: 'sent',\n    total_sent: totalSent,\n    delivered: totalSent,\n    responses: 0,\n    sent_at: new Date().toISOString()\n  };\n};",
+                      "packageJson": "{}"
+                    },
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_10",
+                    "skip": false,
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": "{{connections['cx3T896tr0DW8Ta85dzwE']}}",
+                        "row_id": "{{trigger['body']['row_number']}}",
+                        "values": {
+                          "A": "{{step_9['broadcast_id']}}",
+                          "B": "{{step_9['campaign_id']}}",
+                          "C": "{{step_9['segment']}}",
+                          "D": "{{step_9['message']}}",
+                          "E": "{{step_9['scheduled_date']}}",
+                          "F": "{{step_9['scheduled_time']}}",
+                          "G": "{{step_9['total_sent']}}",
+                          "H": "{{step_9['delivered']}}",
+                          "I": "{{step_9['responses']}}",
+                          "J": "{{step_9['status']}}",
+                          "K": "{{step_9['phones']}}"
+                        },
+                        "sheetId": 522078397,
+                        "spreadsheetId": "1n6EHTmx5hgFXC9vgPVgHGMDo660_N-uIXIBPIoQtl7I",
+                        "first_row_headers": true,
+                        "includeTeamDrives": false
+                      },
+                      "pieceName": "@puchoaistudio/tool-google-sheets",
+                      "actionName": "update_row",
+                      "sampleData": {},
+                      "pieceVersion": "2.0.0",
+                      "propertySettings": {
+                        "auth": {
+                          "type": "MANUAL"
+                        },
+                        "row_id": {
+                          "type": "MANUAL"
+                        },
+                        "values": {
+                          "type": "MANUAL",
+                          "schema": {
+                            "A": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Broadcast ID",
+                              "displayName": "Broadcast ID",
+                              "defaultValue": ""
+                            },
+                            "B": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Campaign ID",
+                              "displayName": "Campaign ID",
+                              "defaultValue": ""
+                            },
+                            "C": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Segment",
+                              "displayName": "Segment",
+                              "defaultValue": ""
+                            },
+                            "D": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Message",
+                              "displayName": "Message",
+                              "defaultValue": ""
+                            },
+                            "E": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Scheduled Date",
+                              "displayName": "Scheduled Date",
+                              "defaultValue": ""
+                            },
+                            "F": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Scheduled Time",
+                              "displayName": "Scheduled Time",
+                              "defaultValue": ""
+                            },
+                            "G": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Total Sent",
+                              "displayName": "Total Sent",
+                              "defaultValue": ""
+                            },
+                            "H": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Delivered",
+                              "displayName": "Delivered",
+                              "defaultValue": ""
+                            },
+                            "I": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Responses",
+                              "displayName": "Responses",
+                              "defaultValue": ""
+                            },
+                            "J": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Status",
+                              "displayName": "Status",
+                              "defaultValue": ""
+                            },
+                            "K": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Phone",
+                              "displayName": "Phone",
+                              "defaultValue": ""
+                            }
+                          }
+                        },
+                        "sheetId": {
+                          "type": "MANUAL"
+                        },
+                        "spreadsheetId": {
+                          "type": "MANUAL"
+                        },
+                        "first_row_headers": {
+                          "type": "MANUAL"
+                        },
+                        "includeTeamDrives": {
+                          "type": "MANUAL"
+                        }
+                      },
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_11",
+                      "skip": false,
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "fields": {
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Broadcast update successfully to all recipients\",\n  \"broadcast_id\": \"{{step_9['broadcast_id']}}\",\n  \"total_sent\": {{step_9['total_sent']}},\n  \"status\": \"update\"\n}\n",
+                            "status": 200,
+                            "headers": {}
+                          },
+                          "respond": "immediately",
+                          "responseType": "json"
+                        },
+                        "pieceName": "@puchoaistudio/tool-webhook",
+                        "actionName": "return_response",
+                        "sampleData": {},
+                        "pieceVersion": "0.1.27",
+                        "propertySettings": {
+                          "fields": {
+                            "type": "MANUAL",
+                            "schema": {
+                              "body": {
+                                "type": "JSON",
+                                "required": true,
+                                "displayName": "JSON Body"
+                              },
+                              "status": {
+                                "type": "NUMBER",
+                                "required": false,
+                                "displayName": "Status",
+                                "defaultValue": 200
+                              },
+                              "headers": {
+                                "type": "OBJECT",
+                                "required": false,
+                                "displayName": "Headers"
+                              }
+                            }
+                          },
+                          "respond": {
+                            "type": "MANUAL"
+                          },
+                          "responseType": {
+                            "type": "MANUAL"
+                          }
+                        },
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Return Response Copy Copy"
+                    },
+                    "displayName": "Update Row"
+                  },
+                  "displayName": "Process Stats Copy Copy"
+                },
+                "displayName": "We have temporarily skipped using the HTTP request and used WhatsApp instead. Copy"
+              },
+              {
+                "name": "step_2",
+                "skip": false,
+                "type": "PIECE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "url": "https://httpbin.org/post",
+                    "body": {
+                      "data": {
+                        "phones": "{{step_3['item']}}",
+                        "message": "{{step_1['message']}}",
+                        "segment": "{{step_1['segment']}}",
+                        "broadcast_id": "{{step_1['broadcast_id']}}"
+                      }
+                    },
+                    "method": "POST",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "authType": "NONE",
+                    "stopFlow": false,
+                    "body_type": "json",
+                    "use_proxy": false,
+                    "authFields": {},
+                    "failureMode": "continue_none",
+                    "queryParams": {},
+                    "proxy_settings": {},
+                    "response_is_binary": false
+                  },
+                  "pieceName": "@puchoaistudio/tool-http",
+                  "actionName": "send_request",
+                  "sampleData": {},
+                  "pieceVersion": "2.0.0",
+                  "propertySettings": {
+                    "url": {
+                      "type": "MANUAL"
+                    },
+                    "body": {
+                      "type": "MANUAL",
+                      "schema": {
+                        "data": {
+                          "type": "JSON",
+                          "required": true,
+                          "displayName": "JSON Body"
+                        }
+                      }
+                    },
+                    "method": {
+                      "type": "MANUAL"
+                    },
+                    "headers": {
+                      "type": "MANUAL"
+                    },
+                    "timeout": {
+                      "type": "MANUAL"
+                    },
+                    "authType": {
+                      "type": "MANUAL"
+                    },
+                    "stopFlow": {
+                      "type": "MANUAL"
+                    },
+                    "body_type": {
+                      "type": "MANUAL"
+                    },
+                    "use_proxy": {
+                      "type": "MANUAL"
+                    },
+                    "authFields": {
+                      "type": "MANUAL",
+                      "schema": {}
+                    },
+                    "failureMode": {
+                      "type": "MANUAL"
+                    },
+                    "queryParams": {
+                      "type": "MANUAL"
+                    },
+                    "proxy_settings": {
+                      "type": "MANUAL",
+                      "schema": {}
+                    },
+                    "response_is_binary": {
+                      "type": "MANUAL"
+                    }
+                  },
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_4",
+                  "skip": false,
+                  "type": "CODE",
+                  "valid": true,
+                  "settings": {
+                    "input": {
+                      "httpResponse": "{{step_2['body']}}",
+                      "broadcastData": "{{step_1}}"
+                    },
+                    "sampleData": {},
+                    "sourceCode": {
+                      "code": "export const code = async (inputs) => {\n  const broadcast = inputs.broadcastData;\n  const response = inputs.httpResponse;\n  \n  const phones = Array.isArray(broadcast.phones) ? broadcast.phones : [];\n  const totalSent = phones.length;\n  \n  return {\n    ...broadcast,\n    status: 'sent',\n    total_sent: totalSent,\n    delivered: totalSent,\n    responses: 0,\n    sent_at: new Date().toISOString()\n  };\n};",
+                      "packageJson": "{}"
+                    },
+                    "errorHandlingOptions": {
+                      "retryOnFailure": {
+                        "value": false
+                      },
+                      "continueOnFailure": {
+                        "value": false
+                      }
+                    }
+                  },
+                  "nextAction": {
+                    "name": "step_5",
+                    "skip": false,
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": "{{connections['cx3T896tr0DW8Ta85dzwE']}}",
+                        "values": {
+                          "A": "{{step_4['broadcast_id']}}",
+                          "B": "{{step_4['campaign_id']}}",
+                          "C": "{{step_4['segment']}}",
+                          "D": "{{step_4['message']}}",
+                          "E": "{{step_4['scheduled_date']}}",
+                          "F": "{{step_4['scheduled_time']}}",
+                          "G": "{{step_4['total_sent']}}",
+                          "H": "{{step_4['delivered']}}",
+                          "I": "{{step_4['responses']}}",
+                          "J": "{{step_4['status']}}",
+                          "K": "{{step_4['phones']}}"
+                        },
+                        "sheetId": 522078397,
+                        "as_string": false,
+                        "spreadsheetId": "1n6EHTmx5hgFXC9vgPVgHGMDo660_N-uIXIBPIoQtl7I",
+                        "first_row_headers": true,
+                        "includeTeamDrives": false
+                      },
+                      "pieceName": "@puchoaistudio/tool-google-sheets",
+                      "actionName": "insert_row",
+                      "sampleData": {},
+                      "pieceVersion": "0.14.1",
+                      "propertySettings": {
+                        "values": {
+                          "type": "MANUAL",
+                          "schema": {
+                            "A": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Broadcast ID",
+                              "displayName": "Broadcast ID",
+                              "defaultValue": ""
+                            },
+                            "B": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Campaign ID",
+                              "displayName": "Campaign ID",
+                              "defaultValue": ""
+                            },
+                            "C": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Segment",
+                              "displayName": "Segment",
+                              "defaultValue": ""
+                            },
+                            "D": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Message",
+                              "displayName": "Message",
+                              "defaultValue": ""
+                            },
+                            "E": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Scheduled Date",
+                              "displayName": "Scheduled Date",
+                              "defaultValue": ""
+                            },
+                            "F": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Scheduled Time",
+                              "displayName": "Scheduled Time",
+                              "defaultValue": ""
+                            },
+                            "G": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Total Sent",
+                              "displayName": "Total Sent",
+                              "defaultValue": ""
+                            },
+                            "H": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Delivered",
+                              "displayName": "Delivered",
+                              "defaultValue": ""
+                            },
+                            "I": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Responses",
+                              "displayName": "Responses",
+                              "defaultValue": ""
+                            },
+                            "J": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Status",
+                              "displayName": "Status",
+                              "defaultValue": ""
+                            },
+                            "K": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Phone",
+                              "displayName": "Phone",
+                              "defaultValue": ""
+                            }
+                          }
+                        },
+                        "sheet_name": {
+                          "type": "MANUAL"
+                        },
+                        "spreadsheet_id": {
+                          "type": "MANUAL"
+                        }
+                      },
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "nextAction": {
+                      "name": "step_6",
+                      "skip": false,
+                      "type": "PIECE",
+                      "valid": true,
+                      "settings": {
+                        "input": {
+                          "fields": {
+                            "body": "{\n  \"success\": true,\n  \"message\": \"Broadcast sent successfully to all recipients\",\n  \"broadcast_id\": \"{{step_4['broadcast_id']}}\",\n  \"total_sent\": {{step_4['total_sent']}},\n  \"status\": \"sent\"\n}\n",
+                            "status": 200,
+                            "headers": {}
+                          },
+                          "respond": "immediately",
+                          "responseType": "json"
+                        },
+                        "pieceName": "@puchoaistudio/tool-webhook",
+                        "actionName": "return_response",
+                        "sampleData": {},
+                        "pieceVersion": "0.1.27",
+                        "propertySettings": {
+                          "fields": {
+                            "type": "MANUAL",
+                            "schema": {
+                              "body": {
+                                "type": "JSON",
+                                "required": true,
+                                "displayName": "JSON Body"
+                              },
+                              "status": {
+                                "type": "NUMBER",
+                                "required": false,
+                                "displayName": "Status",
+                                "defaultValue": 200
+                              },
+                              "headers": {
+                                "type": "OBJECT",
+                                "required": false,
+                                "displayName": "Headers"
+                              }
+                            }
+                          },
+                          "respond": {
+                            "type": "MANUAL"
+                          },
+                          "responseType": {
+                            "type": "MANUAL"
+                          }
+                        },
+                        "errorHandlingOptions": {
+                          "retryOnFailure": {
+                            "value": false
+                          },
+                          "continueOnFailure": {
+                            "value": false
+                          }
+                        }
+                      },
+                      "displayName": "Return Response Copy"
+                    },
+                    "displayName": "Log to Broadcasts Tab Copy"
+                  },
+                  "displayName": "Process Stats Copy"
+                },
+                "displayName": "We have temporarily skipped using the HTTP request and used WhatsApp instead."
+              }
+            ],
+            "settings": {
+              "branches": [
+                {
+                  "branchName": "Branch 2",
+                  "branchType": "CONDITION",
+                  "conditions": [
+                    [
+                      {
+                        "operator": "TEXT_CONTAINS",
+                        "firstValue": "{{trigger['body']['action']}}",
+                        "secondValue": "update",
+                        "caseSensitive": false
+                      }
+                    ]
+                  ]
+                },
+                {
+                  "branchName": "Otherwise",
+                  "branchType": "FALLBACK"
+                }
+              ],
+              "sampleData": {},
+              "executionType": "EXECUTE_FIRST_MATCH"
+            },
+            "displayName": "Router"
+          }
+        },
+        "displayName": "Generate Broadcast ID Copy"
+      }
+    },
+    "valid": true,
+    "agentIds": [],
+    "connectionIds": [
+      "cx3T896tr0DW8Ta85dzwE"
+    ],
+    "schemaVersion": "7"
+  },
+  "blogUrl": ""
+}

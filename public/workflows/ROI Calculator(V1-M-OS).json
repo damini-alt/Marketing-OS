@@ -1,0 +1,427 @@
+﻿{
+  "created": "1778740543460",
+  "updated": "1778740543460",
+  "name": "ROI Calculator(V1-M-OS)",
+  "description": "",
+  "tags": [],
+  "pieces": [
+    "@puchoaistudio/tool-webhook",
+    "@puchoaistudio/tool-google-sheets"
+  ],
+  "template": {
+    "displayName": "ROI Calculator(V1-M-OS)",
+    "trigger": {
+      "name": "trigger",
+      "valid": true,
+      "displayName": "Catch Webhook",
+      "type": "PIECE_TRIGGER",
+      "settings": {
+        "propertySettings": {
+          "authType": {
+            "type": "MANUAL"
+          },
+          "authFields": {
+            "type": "MANUAL",
+            "schema": {}
+          },
+          "liveMarkdown": {
+            "type": "MANUAL"
+          },
+          "syncMarkdown": {
+            "type": "MANUAL"
+          },
+          "testMarkdown": {
+            "type": "MANUAL"
+          }
+        },
+        "pieceName": "@puchoaistudio/tool-webhook",
+        "pieceVersion": "2.0.4",
+        "input": {
+          "authType": "none",
+          "authFields": {}
+        },
+        "sampleData": {},
+        "triggerName": "catch_webhook"
+      },
+      "nextAction": {
+        "name": "step_1",
+        "skip": false,
+        "type": "CODE",
+        "valid": true,
+        "settings": {
+          "input": {},
+          "sampleData": {},
+          "sourceCode": {
+            "code": "export const code = async (inputs) => {\n\n  // Function to generate random unique key\n  const generateKey = (prefix = \"mem\") => {\n    const randomPart = Math.random().toString(36).substring(2, 10);\n    const timestamp = Date.now();\n    return `${prefix}_${timestamp}_${randomPart}`;\n  };\n\n  // Generate 2 unique keys\n  const memoryKey1 = generateKey(\"key1\");\n  const memoryKey2 = generateKey(\"key2\");\n\n  return {\n    memoryKey1,\n    memoryKey2\n  };\n};",
+            "packageJson": "{}"
+          },
+          "errorHandlingOptions": {
+            "retryOnFailure": {
+              "value": false
+            },
+            "continueOnFailure": {
+              "value": false
+            }
+          }
+        },
+        "nextAction": {
+          "name": "step_2",
+          "skip": false,
+          "type": "PIECE",
+          "valid": true,
+          "settings": {
+            "input": {
+              "auth": "{{connections['cx3T896tr0DW8Ta85dzwE']}}",
+              "memKey": "{{step_1['memoryKey1']}}",
+              "sheetId": 570407358,
+              "startRow": "2",
+              "groupSize": "1000",
+              "spreadsheetId": "1n6EHTmx5hgFXC9vgPVgHGMDo660_N-uIXIBPIoQtl7I",
+              "includeTeamDrives": false
+            },
+            "pieceName": "@puchoaistudio/tool-google-sheets",
+            "actionName": "get_all_rows",
+            "sampleData": {},
+            "pieceVersion": "0.14.1",
+            "propertySettings": {
+              "sheet_name": {
+                "type": "MANUAL"
+              },
+              "spreadsheet_id": {
+                "type": "MANUAL"
+              }
+            },
+            "errorHandlingOptions": {
+              "retryOnFailure": {
+                "value": false
+              },
+              "continueOnFailure": {
+                "value": false
+              }
+            }
+          },
+          "nextAction": {
+            "name": "step_3",
+            "skip": false,
+            "type": "PIECE",
+            "valid": true,
+            "settings": {
+              "input": {
+                "auth": "{{connections['cx3T896tr0DW8Ta85dzwE']}}",
+                "memKey": "{{step_1['memoryKey2']}}",
+                "sheetId": 0,
+                "startRow": "2",
+                "groupSize": "1000",
+                "spreadsheetId": "1n6EHTmx5hgFXC9vgPVgHGMDo660_N-uIXIBPIoQtl7I",
+                "includeTeamDrives": false
+              },
+              "pieceName": "@puchoaistudio/tool-google-sheets",
+              "actionName": "get_all_rows",
+              "sampleData": {},
+              "pieceVersion": "0.14.1",
+              "propertySettings": {
+                "sheet_name": {
+                  "type": "MANUAL"
+                },
+                "spreadsheet_id": {
+                  "type": "MANUAL"
+                }
+              },
+              "errorHandlingOptions": {
+                "retryOnFailure": {
+                  "value": false
+                },
+                "continueOnFailure": {
+                  "value": false
+                }
+              }
+            },
+            "nextAction": {
+              "name": "step_4",
+              "skip": false,
+              "type": "CODE",
+              "valid": true,
+              "settings": {
+                "input": {
+                  "leads": "{{step_2}}",
+                  "campaigns": "{{step_3}}"
+                },
+                "sampleData": {},
+                "sourceCode": {
+                  "code": "export const code = async (inputs) => {\n  const leads = inputs.leads || [];\n  const campaigns = inputs.campaigns || [];\n  \n  const roiData = [];\n  \n  for (const campaignWrapper of campaigns) {\n    // Extract data from Pucho Studio's \"values\" wrapper object\n    const campaign = campaignWrapper.values || campaignWrapper; \n    \n    const campaignId = campaign.A || campaign['Campaign ID'];\n    const campaignName = campaign.B || campaign['Campaign Name'];\n    const budget = campaign.F || campaign['Budget'];\n\n    // Skip if Campaign ID is missing\n    if (!campaignId) continue;\n    \n    // Filter leads that match this Campaign ID\n    const campaignLeads = leads.filter(lWrapper => {\n        const l = lWrapper.values || lWrapper;\n        return (l.F || l['Campaign ID']) === campaignId;\n    });\n    \n    const totalLeads = campaignLeads.length;\n    \n    // Filter leads that have successfully converted\n    const convertedLeads = campaignLeads.filter(lWrapper => {\n        const l = lWrapper.values || lWrapper;\n        const status = l.G || l['Status'];\n        return status && status.toLowerCase() === 'converted';\n    });\n    \n    // Calculate total revenue generated by converted leads\n    const totalRevenue = convertedLeads.reduce((sum, lWrapper) => {\n        const l = lWrapper.values || lWrapper;\n        const rev = parseFloat(l.J || l['Revenue']) || 0;\n        return sum + rev;\n    }, 0);\n    \n    const totalCost = parseFloat(budget) || 0;\n    const leadsConverted = convertedLeads.length;\n    \n    // Calculate final ROI metrics\n    const roiPercentage = totalCost > 0 ? ((totalRevenue - totalCost) / totalCost) * 100 : 0;\n    const conversionRate = totalLeads > 0 ? (leadsConverted / totalLeads) * 100 : 0;\n    const costPerLead = totalLeads > 0 ? totalCost / totalLeads : 0;\n    const revenuePerLead = leadsConverted > 0 ? totalRevenue / leadsConverted : 0;\n    \n    // Push the calculated metrics to the final array\n    roiData.push({\n      roi_id: `ROI-${campaignId}`,\n      campaign_id: campaignId,\n      campaign_name: campaignName,\n      total_cost: totalCost,\n      total_revenue: totalRevenue,\n      leads_generated: totalLeads,\n      leads_converted: leadsConverted,\n      roi_percentage: Math.round(roiPercentage * 100) / 100,\n      conversion_rate: Math.round(conversionRate * 100) / 100,\n      cost_per_lead: Math.round(costPerLead * 100) / 100,\n      revenue_per_lead: Math.round(revenuePerLead * 100) / 100,\n      updated_date: new Date().toISOString().split('T')[0]\n    });\n  }\n  \n  return { roiData };\n};\n",
+                  "packageJson": "{}"
+                },
+                "errorHandlingOptions": {
+                  "retryOnFailure": {
+                    "value": false
+                  },
+                  "continueOnFailure": {
+                    "value": false
+                  }
+                }
+              },
+              "nextAction": {
+                "name": "step_5",
+                "skip": false,
+                "type": "CODE",
+                "valid": true,
+                "settings": {
+                  "input": {
+                    "roiData": "{{step_4['roiData']}}"
+                  },
+                  "sampleData": {},
+                  "sourceCode": {
+                    "code": "export const code = async (inputs) => {\n  const roiData = inputs.roiData || [];\n  \n  const rows = roiData.map(r => ({\n    A: r.roi_id,\n    B: r.campaign_id,\n    C: r.campaign_name,\n    D: r.total_cost,\n    E: r.total_revenue,\n    F: r.leads_generated,\n    G: r.leads_converted,\n    H: r.roi_percentage,\n    I: r.conversion_rate,\n    J: r.cost_per_lead,\n    K: r.revenue_per_lead,\n    L: r.updated_date\n  }));\n  \n  return {\n    success: true,\n    rowCount: rows.length,\n    rows: rows\n  };\n};",
+                    "packageJson": "{}"
+                  },
+                  "errorHandlingOptions": {
+                    "retryOnFailure": {
+                      "value": false
+                    },
+                    "continueOnFailure": {
+                      "value": false
+                    }
+                  }
+                },
+                "nextAction": {
+                  "name": "step_6",
+                  "skip": false,
+                  "type": "LOOP_ON_ITEMS",
+                  "valid": true,
+                  "settings": {
+                    "items": "{{step_5['rows']}}",
+                    "sampleData": {}
+                  },
+                  "nextAction": {
+                    "name": "step_8",
+                    "skip": false,
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "fields": {
+                          "body": "{\n  \"success\": true,\n  \"message\": \"ROI calculation completed successfully\",\n  \"data\": {{step_5['rows']}}\n}\n",
+                          "status": 200,
+                          "headers": {}
+                        },
+                        "respond": "stop",
+                        "responseType": "json"
+                      },
+                      "pieceName": "@puchoaistudio/tool-webhook",
+                      "actionName": "return_response",
+                      "sampleData": {},
+                      "pieceVersion": "2.0.4",
+                      "propertySettings": {
+                        "fields": {
+                          "type": "MANUAL",
+                          "schema": {
+                            "body": {
+                              "type": "JSON",
+                              "required": true,
+                              "displayName": "JSON Body"
+                            },
+                            "status": {
+                              "type": "NUMBER",
+                              "required": false,
+                              "displayName": "Status",
+                              "defaultValue": 200
+                            },
+                            "headers": {
+                              "type": "OBJECT",
+                              "required": false,
+                              "displayName": "Headers"
+                            }
+                          }
+                        },
+                        "respond": {
+                          "type": "MANUAL"
+                        },
+                        "responseType": {
+                          "type": "MANUAL"
+                        }
+                      },
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Return Response"
+                  },
+                  "displayName": "Loop on Items",
+                  "firstLoopAction": {
+                    "name": "step_7",
+                    "skip": false,
+                    "type": "PIECE",
+                    "valid": true,
+                    "settings": {
+                      "input": {
+                        "auth": "{{connections['cx3T896tr0DW8Ta85dzwE']}}",
+                        "values": {
+                          "A": "{{step_6['item']['A']}}",
+                          "B": "{{step_6['item']['B']}}",
+                          "C": "{{step_6['item']['C']}}",
+                          "D": "{{step_6['item']['D']}}",
+                          "E": "{{step_6['item']['E']}}",
+                          "F": "{{step_6['item']['F']}}",
+                          "G": "{{step_6['item']['G']}}",
+                          "H": "{{step_6['item']['H']}}",
+                          "I": "{{step_6['item']['I']}}",
+                          "J": "{{step_6['item']['J']}}",
+                          "K": "{{step_6['item']['K']}}",
+                          "L": "{{step_6['item']['L']}}"
+                        },
+                        "sheetId": 974136326,
+                        "as_string": false,
+                        "spreadsheetId": "1n6EHTmx5hgFXC9vgPVgHGMDo660_N-uIXIBPIoQtl7I",
+                        "first_row_headers": true,
+                        "includeTeamDrives": false
+                      },
+                      "pieceName": "@puchoaistudio/tool-google-sheets",
+                      "actionName": "insert_row",
+                      "sampleData": {},
+                      "pieceVersion": "2.0.0",
+                      "propertySettings": {
+                        "auth": {
+                          "type": "MANUAL"
+                        },
+                        "values": {
+                          "type": "MANUAL",
+                          "schema": {
+                            "A": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "ROI ID",
+                              "displayName": "ROI ID",
+                              "defaultValue": ""
+                            },
+                            "B": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Campaign ID",
+                              "displayName": "Campaign ID",
+                              "defaultValue": ""
+                            },
+                            "C": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Campaign Name",
+                              "displayName": "Campaign Name",
+                              "defaultValue": ""
+                            },
+                            "D": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Total Cost",
+                              "displayName": "Total Cost",
+                              "defaultValue": ""
+                            },
+                            "E": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Total Revenue",
+                              "displayName": "Total Revenue",
+                              "defaultValue": ""
+                            },
+                            "F": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Leads Generated",
+                              "displayName": "Leads Generated",
+                              "defaultValue": ""
+                            },
+                            "G": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Leads Converted",
+                              "displayName": "Leads Converted",
+                              "defaultValue": ""
+                            },
+                            "H": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "ROI %",
+                              "displayName": "ROI %",
+                              "defaultValue": ""
+                            },
+                            "I": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Conversion Rate",
+                              "displayName": "Conversion Rate",
+                              "defaultValue": ""
+                            },
+                            "J": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Cost per Lead",
+                              "displayName": "Cost per Lead",
+                              "defaultValue": ""
+                            },
+                            "K": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Revenue per Lead",
+                              "displayName": "Revenue per Lead",
+                              "defaultValue": ""
+                            },
+                            "L": {
+                              "type": "SHORT_TEXT",
+                              "required": false,
+                              "description": "Updated Date",
+                              "displayName": "Updated Date",
+                              "defaultValue": ""
+                            }
+                          }
+                        },
+                        "sheetId": {
+                          "type": "MANUAL"
+                        },
+                        "as_string": {
+                          "type": "MANUAL"
+                        },
+                        "spreadsheetId": {
+                          "type": "MANUAL"
+                        },
+                        "first_row_headers": {
+                          "type": "MANUAL"
+                        },
+                        "includeTeamDrives": {
+                          "type": "MANUAL"
+                        }
+                      },
+                      "errorHandlingOptions": {
+                        "retryOnFailure": {
+                          "value": false
+                        },
+                        "continueOnFailure": {
+                          "value": false
+                        }
+                      }
+                    },
+                    "displayName": "Insert Row"
+                  }
+                },
+                "displayName": "Update ROI Tab Copy"
+              },
+              "displayName": "Calculate ROI Metrics Copy"
+            },
+            "displayName": "Get Campaigns from Tab"
+          },
+          "displayName": "Get Leads from Tab"
+        },
+        "displayName": "Code Copy"
+      }
+    },
+    "valid": true,
+    "agentIds": [],
+    "connectionIds": [
+      "cx3T896tr0DW8Ta85dzwE"
+    ],
+    "schemaVersion": "7"
+  },
+  "blogUrl": ""
+}

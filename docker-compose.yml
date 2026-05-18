@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  marketing-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: marketing-dashboard
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true

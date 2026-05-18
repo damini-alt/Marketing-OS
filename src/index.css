@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-50 text-slate-900;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Glassmorphism & Cards */
+.premium-card {
+  @apply bg-white rounded-[24px] border border-slate-100 shadow-card overflow-hidden;
+}
+
+.glass-card {
+  @apply bg-white/70 backdrop-blur-xl border border-white/40 shadow-soft rounded-[24px];
+}
+
+.primary-gradient {
+  @apply bg-gradient-to-br from-primary to-primary-700;
+}
+
+/* Ant Design Global Overrides - Modern SaaS Look */
+.ant-btn {
+  @apply rounded-xl font-bold h-11 px-6 flex items-center justify-center transition-all duration-200 border-slate-200 text-slate-600 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.ant-btn-primary {
+  @apply bg-primary border-primary text-white hover:bg-primary-600 hover:border-primary-600 shadow-soft !important;
+}
+
+.ant-btn-text {
+  @apply hover:bg-slate-50 border-transparent !important;
+}
+
+/* Improved Input Styles - Larger and better aligned */
+.ant-input, 
+.ant-input-password, 
+.ant-input-affix-wrapper, 
+.ant-select-selector,
+.ant-picker {
+  @apply !rounded-xl !border-slate-200 !h-[52px] transition-all !important;
+  background-color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Regular inputs padding and text alignment */
+.ant-input:not(.ant-input-affix-wrapper) {
+  @apply !px-4 !important;
+}
+
+.ant-input-affix-wrapper .ant-input {
+  @apply !h-full !border-none !shadow-none !p-0 !important;
+}
+
+.ant-input:hover, 
+.ant-input-affix-wrapper:hover,
+.ant-select-selector:hover,
+.ant-picker:hover {
+  border-color: #c01a7a !important;
+}
+
+.ant-input:focus, 
+.ant-input-focused,
+.ant-input-affix-wrapper-focused,
+.ant-select-selector:focus,
+.ant-picker-focused {
+  border-color: #c01a7a !important;
+  box-shadow: 0 0 0 4px rgba(192, 26, 122, 0.08) !important;
+}
+
+.ant-select-selector {
+  @apply !h-[52px] !flex !items-center !px-4 !important;
+}
+
+.ant-select-selection-search {
+  @apply !flex !items-center !important;
+}
+
+.ant-table-wrapper {
+  @apply !rounded-2xl !overflow-hidden !border !border-slate-100;
+}
+
+.ant-table-thead > tr > th {
+  @apply !bg-slate-50/50 !text-slate-500 !font-bold !text-xs !uppercase !tracking-wider !py-4 !border-b !border-slate-100 !important;
+}
+
+.ant-table-tbody > tr > td {
+  @apply !py-4 !text-slate-600 !border-b !border-slate-50 !important;
+}
+
+.ant-table-tbody > tr:hover > td {
+  @apply !bg-slate-50/30 !important;
+}
+
+.ant-card {
+  @apply rounded-[24px] border-slate-100 shadow-card !important;
+}
+
+/* Custom Navigation */
+.nav-item-active {
+  @apply bg-primary text-white shadow-soft;
+}
+
+.nav-item-inactive {
+  @apply text-slate-500 hover:text-slate-900 hover:bg-slate-50;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+
+/* Layout Utilities */
+@media (max-width: 768px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
