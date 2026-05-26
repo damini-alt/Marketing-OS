@@ -12,6 +12,12 @@ import ROI from './pages/ROI'
 import Broadcast from './pages/Broadcast'
 import Settings from './pages/Settings'
 import Login from './pages/Login'
+import DealerSchemes from './pages/DealerSchemes'
+import Quotations from './pages/Quotations'
+import FieldSales from './pages/FieldSales'
+import AMC from './pages/AMC'
+import Onboarding from './pages/Onboarding'
+import Testimonials from './pages/Testimonials'
 import { useStore } from './hooks/useStore'
 
 function App() {
@@ -51,6 +57,12 @@ function App() {
                   <Route path="/content" element={<ContentCalendar />} />
                   <Route path="/roi" element={<ROI />} />
                   <Route path="/broadcast" element={<Broadcast />} />
+                  <Route path="/quotations" element={<Quotations />} />
+                  <Route path="/field-sales" element={<FieldSales />} />
+                  <Route path="/dealer-schemes" element={<DealerSchemes />} />
+                  <Route path="/amc" element={<AMC />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/testimonials" element={<Testimonials />} />
                   <Route path="/settings" element={<Settings />} />
                 </Routes>
               </AnimatePresence>

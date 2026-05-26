@@ -13,6 +13,13 @@ import {
   ChevronRight,
   Zap,
   LogOut,
+  FileText,
+  MapPin,
+  Award,
+  Shield,
+  Repeat,
+  FileCheck,
+  MessageSquare,
 } from 'lucide-react'
 import logo from '../../assests/logo.png'
 
@@ -23,6 +30,12 @@ const menuItems = [
   { id: '/content', name: 'Content', icon: Calendar },
   { id: '/roi', name: 'ROI Analytics', icon: TrendingUp },
   { id: '/broadcast', name: 'Broadcast', icon: Radio },
+  { id: '/quotations', name: 'Quotations', icon: FileText },
+  { id: '/field-sales', name: 'Field Sales', icon: MapPin },
+  { id: '/dealer-schemes', name: 'Dealer Schemes', icon: Award },
+  { id: '/amc', name: 'AMC & Renewals', icon: Shield },
+  { id: '/onboarding', name: 'Onboarding', icon: FileCheck },
+  { id: '/testimonials', name: 'Testimonials', icon: MessageSquare },
   { id: '/settings', name: 'Settings', icon: Settings },
 ]
 

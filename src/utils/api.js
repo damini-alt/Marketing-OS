@@ -1,13 +1,8 @@
-const WEBHOOK_URLS = {
-  campaignManagement: 'https://studio.pucho.ai/api/v1/webhooks/38BRtwRgT0lJ08s761dLg',
-  leadTracking: 'https://studio.pucho.ai/api/v1/webhooks/NqbXFa7tn8yRPdvZozbIH',
-  roiCalculator: 'https://studio.pucho.ai/api/v1/webhooks/g0UxcutY8vPpywv5GMkEx',
-  contentCalendar: 'https://studio.pucho.ai/api/v1/webhooks/jOKr4P866GGD9DuldyAU2',
-  broadcast: 'https://studio.pucho.ai/api/v1/webhooks/iF9d6XBIlCU15ihehCQmi',
-  dataSync: 'https://studio.pucho.ai/api/v1/webhooks/KycbWCDvwVgdMlcm7rGso',
-}
+import { SHEET_CONFIG } from '../config/sheetsConfig'
 
-const SPREADSHEET_ID = 'YOUR_GOOGLE_SHEET_ID'
+const WEBHOOK_URLS = SHEET_CONFIG.webhookUrls
+
+const SPREADSHEET_ID = SHEET_CONFIG.editSpreadsheetId
 
 export const triggerWebhook = async (webhookUrl, payload) => {
   try {

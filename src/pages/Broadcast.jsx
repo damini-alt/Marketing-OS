@@ -438,11 +438,14 @@ function Broadcast() {
             }}
           </Form.Item>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit" loading={sending}>
-              Schedule Broadcast
-            </Button>
+          <div className="flex justify-between items-center pt-4">
+            <Button type="dashed" onClick={() => form.setFieldsValue({ channel: 'whatsapp', segment: 'all', message: 'Hello! This is a dummy broadcast message to test the system.', scheduled_date: '2026-05-25', scheduled_time: '14:00' })}>Fill Dummy Data</Button>
+            <div className="flex gap-3">
+              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="primary" htmlType="submit" loading={sending}>
+                Schedule Broadcast
+              </Button>
+            </div>
           </div>
         </Form>
       </Modal>

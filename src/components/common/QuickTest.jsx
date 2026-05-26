@@ -13,9 +13,9 @@ const QuickTest = ({ type, onTest }) => {
         ];
       case 'lead':
         return [
-          { label: 'Retail Lead', data: { full_name: 'Anil Kumar', email: 'anil@example.com', phone: '+91 98765 43210', source: 'Instagram', status: 'new', revenue: 0 } },
-          { label: 'B2B Lead', data: { full_name: 'Suresh Traders', email: 'suresh@traders.com', phone: '+91 91234 56789', source: 'Google Ads', status: 'qualified', revenue: 50000 } },
-          { label: 'Wholesale Lead', data: { full_name: 'Global Exports', email: 'info@global.com', phone: '+91 88888 77777', source: 'WhatsApp', status: 'negotiation', revenue: 200000 } }
+          { label: 'Retail Lead', data: { full_name: 'Anil Kumar', email: 'anil@example.com', phone: '9876543210', source: 'Instagram', status: 'new', revenue: 0 } },
+          { label: 'B2B Lead', data: { full_name: 'Suresh Traders', email: 'suresh@traders.com', phone: '9123456789', source: 'Google Ads', status: 'qualified', revenue: 50000 } },
+          { label: 'Wholesale Lead', data: { full_name: 'Global Exports', email: 'info@global.com', phone: '8888877777', source: 'WhatsApp', status: 'negotiation', revenue: 200000 } }
         ];
       case 'content':
         return [

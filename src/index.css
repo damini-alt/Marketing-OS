@@ -81,6 +81,10 @@
   box-shadow: 0 0 0 4px rgba(192, 26, 122, 0.08) !important;
 }
 
+.ant-select {
+  @apply !h-[52px] !important;
+}
+
 .ant-select-selector {
   @apply !h-[52px] !flex !items-center !px-4 !important;
 }

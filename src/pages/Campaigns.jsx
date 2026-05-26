@@ -395,11 +395,14 @@ function Campaigns() {
             <Input placeholder="e.g., All customers, New leads, Young professionals" size="large" />
           </Form.Item>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit">
-              {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
-            </Button>
+          <div className="flex justify-between items-center pt-4">
+            <Button type="dashed" onClick={() => form.setFieldsValue({ campaign_name: 'Dummy Mega Sale 2026', campaign_type: 'discount', start_date: '2026-06-01', end_date: '2026-06-30', budget: 150000, status: 'planned', channels: ['WhatsApp', 'Instagram'], target_audience: 'Existing Customers' })}>Fill Dummy Data</Button>
+            <div className="flex gap-3">
+              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="primary" htmlType="submit">
+                {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
+              </Button>
+            </div>
           </div>
         </Form>
       </Modal>

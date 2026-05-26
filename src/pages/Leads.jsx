@@ -362,7 +362,7 @@ function Leads() {
               label="Phone"
               rules={[{ required: true, message: 'Please enter phone' }]}
             >
-              <Input placeholder="+91-9876543210" size="large" />
+              <Input placeholder="9876543210" size="large" />
             </Form.Item>
           </div>
 
@@ -466,11 +466,14 @@ function Leads() {
             }
           </Form.Item>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit">
-              {editingLead ? 'Update Lead' : 'Add Lead'}
-            </Button>
+          <div className="flex justify-between items-center pt-4">
+            <Button type="dashed" onClick={() => form.setFieldsValue({ name: 'Amit Kumar', phone: '9876543210', email: 'amit@example.com', source: 'WhatsApp', status: 'new', created_date: '2026-05-20' })}>Fill Dummy Data</Button>
+            <div className="flex gap-3">
+              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="primary" htmlType="submit">
+                {editingLead ? 'Update Lead' : 'Add Lead'}
+              </Button>
+            </div>
           </div>
         </Form>
       </Modal>

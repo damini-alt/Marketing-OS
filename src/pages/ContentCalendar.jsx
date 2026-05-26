@@ -482,11 +482,14 @@ Do not copy the reference exactly. Create a fresh, unique, and high-quality desi
             </Select>
           </Form.Item>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-            <Button type="primary" htmlType="submit">
-              {editingContent ? 'Update Content' : 'Schedule Content'}
-            </Button>
+          <div className="flex justify-between items-center pt-4">
+            <Button type="dashed" onClick={() => form.setFieldsValue({ title: 'Dummy Content Post', platform: 'Instagram', content_type: 'image', scheduled_date: '2026-05-22', scheduled_time: '10:00', caption: 'This is a dummy caption for the content calendar post.', status: 'draft' })}>Fill Dummy Data</Button>
+            <div className="flex gap-3">
+              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+              <Button type="primary" htmlType="submit">
+                {editingContent ? 'Update Content' : 'Schedule Content'}
+              </Button>
+            </div>
           </div>
         </Form>
       </Modal>

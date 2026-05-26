@@ -11,6 +11,12 @@ const pageTitles = {
   '/content': { title: 'Content Calendar', description: 'Plan & schedule content' },
   '/roi': { title: 'ROI Analytics', description: 'Track campaign performance' },
   '/broadcast': { title: 'Broadcast', description: 'Send WhatsApp broadcasts' },
+  '/quotations': { title: 'Quotations', description: 'Generate & manage quotes' },
+  '/field-sales': { title: 'Field Sales', description: 'Track rep visits & locations' },
+  '/dealer-schemes': { title: 'Dealer Schemes', description: 'Manage cashback & discounts' },
+  '/amc': { title: 'AMC & Renewals', description: 'Service contract renewals' },
+  '/onboarding': { title: 'KYC Onboarding', description: 'B2B dealer onboarding' },
+  '/testimonials': { title: 'Testimonials', description: 'Customer reviews & feedback' },
   '/settings': { title: 'Settings', description: 'Configure your dashboard' },
 }
 

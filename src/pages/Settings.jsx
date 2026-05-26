@@ -444,6 +444,18 @@ function Settings() {
                 >
                   <Input placeholder="https://..." size="large" />
                 </Form.Item>
+                <Form.Item
+                  name={['webhookUrls', 'onboarding']}
+                  label="KYC Onboarding (WF11)"
+                >
+                  <Input placeholder="https://..." size="large" />
+                </Form.Item>
+                <Form.Item
+                  name={['webhookUrls', 'testimonials']}
+                  label="Testimonials (WF12)"
+                >
+                  <Input placeholder="https://..." size="large" />
+                </Form.Item>
               </div>
 
               <div className="flex justify-end gap-3 pt-4">
