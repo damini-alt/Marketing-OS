@@ -19,9 +19,10 @@ import {
   UserCheck,
   Star,
 } from 'lucide-react'
-import { Tooltip } from 'antd'
+import { Tooltip, Dropdown, message } from 'antd'
 import StatCard from '../components/common/StatCard'
 import BarChart from '../components/charts/BarChart'
+import AreaChart from '../components/charts/AreaChart'
 import Badge from '../components/common/Badge'
 import { useStore } from '../hooks/useStore'
 
@@ -41,7 +42,14 @@ const itemVariants = {
 }
 
 function Dashboard() {
-  const { stats, leadsBySource, campaigns, leads, workflows, painPoints, quotations, fieldSales, onboarding, testimonials } = useStore()
+  const { stats, leadsBySource, campaigns, leads, workflows, painPoints, quotations, fieldSales, onboarding, testimonials, syncData } = useStore()
+  
+  const leadAcquisitionData = [
+    { name: '1st week', value: 30 },
+    { name: '2nd week', value: 45 },
+    { name: '3rd week', value: 60 },
+    { name: 'This week', value: 85 }
+  ]
   
   const enabledWorkflows = workflows.filter(w => w.enabled).length
   const activePainPoints = painPoints.filter(p => p.enabled).length
@@ -151,9 +159,27 @@ function Dashboard() {
               <h3 className="text-lg font-bold text-slate-900">Top Channels</h3>
               <p className="text-sm text-slate-500">Lead distribution</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400">
-              <MoreVertical className="w-4 h-4" />
-            </div>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: '1', label: 'Refresh Data' },
+                  { key: '2', label: 'View Channel Details' }
+                ],
+                onClick: ({ key }) => {
+                  if (key === '1') {
+                    syncData()
+                    message.success('Refreshing channel data...')
+                  } else {
+                    message.info('Channel details view simulated.')
+                  }
+                }
+              }}
+              trigger={['click']}
+            >
+              <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all cursor-pointer border-none outline-none">
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </Dropdown>
           </div>
           <div className="space-y-4">
             {leadsSourceData.map((item, index) => {
@@ -242,11 +268,28 @@ function Dashboard() {
         </motion.div>
       </motion.div>
 
+      {/* Trends Row */}
+      <motion.div variants={containerVariants} initial="initial" animate="animate" className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <AreaChart data={leadAcquisitionData} title="Lead Acquisition Trend" subtitle="Weekly performance in the last month" dataKey="value" xKey="name" />
+        </motion.div>
+        
+        <motion.div variants={itemVariants} className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-center">
+          <div>
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Acquisition Status</h4>
+            <h2 className="text-3xl font-black text-slate-900 mb-2">Active Growth</h2>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Lead acquisition velocity has increased by 40% compared to the first week of the month, driven by strong performance in Google Ads.
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+
       {/* Module Lists - 4 Columns with Recent Items */}
-      <motion.div variants={containerVariants} initial="initial" animate="animate" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div variants={containerVariants} initial="initial" animate="animate" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Quotations List */}
         <motion.div variants={itemVariants} className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
                 <FileText className="w-4 h-4 text-indigo-600" />
@@ -273,7 +316,7 @@ function Dashboard() {
 
         {/* Field Visits List */}
         <motion.div variants={itemVariants} className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
                 <MapPin className="w-4 h-4 text-orange-600" />
@@ -297,7 +340,7 @@ function Dashboard() {
 
         {/* Onboarding List */}
         <motion.div variants={itemVariants} className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center">
                 <UserCheck className="w-4 h-4 text-cyan-600" />
@@ -321,7 +364,7 @@ function Dashboard() {
 
         {/* Testimonials List */}
         <motion.div variants={itemVariants} className="bg-white rounded-2xl border border-slate-200 p-5">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center">
                 <Star className="w-4 h-4 text-amber-600" />

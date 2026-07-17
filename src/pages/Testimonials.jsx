@@ -61,7 +61,7 @@ function Testimonials() {
     },
   ]
 
-  const filteredReviews = filterStatus ? reviews.filter(r => r.status === filterStatus) : reviews
+  const filteredReviews = filterStatus && filterStatus !== 'all' ? reviews.filter(r => r.status === filterStatus) : reviews
 
   // Stats calculation
   const totalRequests = reviews.length
@@ -144,6 +144,7 @@ function Testimonials() {
             allowClear
             onChange={setFilterStatus}
             options={[
+              { value: 'all', label: 'All Statuses' },
               { value: 'Collected', label: 'Collected' },
               { value: 'Pending', label: 'Pending Request' },
             ]}

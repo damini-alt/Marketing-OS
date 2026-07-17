@@ -38,7 +38,7 @@ function Settings() {
       const reader = new FileReader()
       reader.onloadend = () => {
         setProfilePic(reader.result)
-        localStorage.setItem('profilePic', reader.result)
+        updateProfile({ profilePic: reader.result })
         message.success('Profile photo updated!')
       }
       reader.readAsDataURL(file)

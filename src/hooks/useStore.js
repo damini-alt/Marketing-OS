@@ -79,6 +79,7 @@ const useStore = create((set, get) => ({
     name: localStorage.getItem('adminName') || 'Admin',
     email: localStorage.getItem('adminEmail') || 'admin@pucho.ai',
     phone: localStorage.getItem('adminPhone') || '9988776655',
+    profilePic: localStorage.getItem('profilePic') || '',
   },
 
   updateProfile: (updates) => {
@@ -87,8 +88,15 @@ const useStore = create((set, get) => ({
       if (updates.name) localStorage.setItem('adminName', updates.name)
       if (updates.email) localStorage.setItem('adminEmail', updates.email)
       if (updates.phone) localStorage.setItem('adminPhone', updates.phone)
+      if (updates.profilePic !== undefined) localStorage.setItem('profilePic', updates.profilePic)
       return { profile: newProfile }
     })
+  },
+
+  addFieldVisit: (visit) => {
+    set((state) => ({
+      fieldSales: [visit, ...state.fieldSales]
+    }));
   },
 
   toggleWorkflow: async (workflowId) => {
@@ -253,7 +261,7 @@ const useStore = create((set, get) => ({
         campaigns: state.campaigns.filter(c => c.campaign_id !== campaignId),
       }))
       // Small delay to allow Google Sheets to update the published CSV
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
       set({ loading: false })
       return { success: true }
     } catch (error) {
@@ -357,7 +365,7 @@ const useStore = create((set, get) => ({
       }));
 
       // Small delay to allow Google Sheets to update and then trigger sync
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
 
       return { success: true, data: finalOnb };
     } catch (error) {
@@ -386,7 +394,7 @@ const useStore = create((set, get) => ({
           spreadsheet_id: SHEET_CONFIG.editSpreadsheetId
         })
       });
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
     } catch (e) {
       console.warn("Status update webhook failed, updated locally.");
     }
@@ -436,7 +444,7 @@ const useStore = create((set, get) => ({
       }));
 
       // Small delay to allow Google Sheets to update and then trigger sync
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
 
       return { success: true, data: finalTestimonial };
     } catch (error) {
@@ -464,7 +472,7 @@ const useStore = create((set, get) => ({
           spreadsheet_id: SHEET_CONFIG.editSpreadsheetId
         })
       });
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
     } catch (e) {
       console.warn("Testimonial update webhook failed, updated locally.");
     }
@@ -525,7 +533,7 @@ const useStore = create((set, get) => ({
         leads: state.leads.filter(l => l.lead_id !== leadId),
       }))
       // Small delay to allow Google Sheets to update the published CSV
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
       set({ loading: false })
       return { success: true }
     } catch (error) {
@@ -613,7 +621,7 @@ const useStore = create((set, get) => ({
         content: state.content.filter(c => c.content_id !== contentId),
       }))
       // Small delay to allow Google Sheets to update the published CSV
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
       set({ loading: false })
       return { success: true }
     } catch (error) {
@@ -739,7 +747,7 @@ const useStore = create((set, get) => ({
         broadcasts: state.broadcasts.filter(b => b.broadcast_id !== broadcastId),
       }))
       // Small delay to allow Google Sheets to update the published CSV
-      setTimeout(() => get().syncData(), 1500);
+      // setTimeout(() => get().syncData(), 1500);
       set({ loading: false })
       return { success: true }
     } catch (error) {
@@ -893,19 +901,23 @@ const useStore = create((set, get) => ({
             return obj;
           });
           
-          // Deduplicate rows safely - use ID + Row Number to ensure all sheet entries are shown
+          // Deduplicate rows safely - traverse backwards to ensure latest sheet entries are kept (actual spend and updated status)
           const uniqueRows = [];
           const seenUniqueKeys = new Set();
           
-          finalRows.forEach(row => {
-            const id = row.campaign_id || row.lead_id || row.content_id || row.broadcast_id || row.roi_id || 'no-id';
-            const uniqueKey = `${id}-${row.row_number}`;
+          for (let i = finalRows.length - 1; i >= 0; i--) {
+            const row = finalRows[i];
+            const id = row.campaign_id || row.lead_id || row.content_id || 
+                       row.broadcast_id || row.roi_id || row.quotation_id || 
+                       row.onboarding_id || row.testimonial_id || row.visit_id || 
+                       row.dealer_id || row.id || row.scheme_id || 'no-id';
+            const uniqueKey = id && id !== 'no-id' ? id : `row-${row.row_number}`;
             
             if (!seenUniqueKeys.has(uniqueKey)) {
               seenUniqueKeys.add(uniqueKey);
-              uniqueRows.push(row);
+              uniqueRows.unshift(row);
             }
-          });
+          }
 
           return uniqueRows;
         }
@@ -1204,13 +1216,17 @@ const useStore = create((set, get) => ({
 
       const notifications = [];
 
+      const total_leads = roi.reduce((sum, r) => sum + (parseInt(r.leads_generated) || 0), 0);
+      const converted_leads = roi.reduce((sum, r) => sum + (parseInt(r.leads_converted) || 0), 0);
+      const total_revenue = roi.reduce((sum, r) => sum + (parseFloat(r.total_revenue) || 0), 0);
+
       const stats = {
         total_campaigns: campaigns.length,
         active_campaigns: campaigns.filter(c => c.status === 'active').length,
-        total_leads: leads.length,
-        new_leads: leads.filter(l => l.status === 'new').length,
-        converted_leads: leads.filter(l => l.status === 'converted').length,
-        total_revenue: leads.reduce((sum, l) => sum + (parseFloat(l.revenue) || 0), 0),
+        total_leads: total_leads,
+        new_leads: Math.max(0, total_leads - converted_leads),
+        converted_leads: converted_leads,
+        total_revenue: total_revenue,
         pending_content: content.filter(c => c.status === 'scheduled').length,
         total_broadcasts: broadcasts.length,
         // New Module Stats

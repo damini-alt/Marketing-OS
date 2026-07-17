@@ -226,8 +226,8 @@ function Leads() {
   }
 
   const filteredLeads = leads.filter((l) => {
-    if (filterStatus && l.status !== filterStatus) return false
-    if (filterSource && l.source !== filterSource) return false
+    if (filterStatus && filterStatus !== 'all' && l.status !== filterStatus) return false
+    if (filterSource && filterSource !== 'all' && l.source !== filterSource) return false
     return true
   })
 
@@ -281,6 +281,7 @@ function Leads() {
             onChange={setFilterStatus}
             className="rounded-xl"
             options={[
+              { value: 'all', label: 'All Statuses' },
               { value: 'new', label: 'New' },
               { value: 'contacted', label: 'Contacted' },
               { value: 'qualified', label: 'Qualified' },
@@ -295,6 +296,7 @@ function Leads() {
             onChange={setFilterSource}
             className="rounded-xl"
             options={[
+              { value: 'all', label: 'All Sources' },
               { value: 'WhatsApp', label: 'WhatsApp' },
               { value: 'Instagram', label: 'Instagram' },
               { value: 'Facebook', label: 'Facebook' },

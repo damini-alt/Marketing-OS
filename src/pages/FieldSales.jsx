@@ -26,6 +26,7 @@ const SALES_REPS = ['Amit Kumar', 'Sumit Singh', 'Rahul Dev', 'Priya Sharma']
 function FieldSales() {
   const fieldSales = useStore(state => state.fieldSales)
   const syncData = useStore(state => state.syncData)
+  const addFieldVisit = useStore(state => state.addFieldVisit)
   
   const visits = fieldSales.length > 0 ? fieldSales : INITIAL_VISITS
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -86,11 +87,19 @@ function FieldSales() {
 
       if (response.ok) {
         message.success('Field visit logged and webhook triggered successfully!')
+        const newVisit = {
+          id: `VISIT-${Date.now()}`,
+          rep: values.rep,
+          customer: values.customer,
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          location: values.location || 'Delhi (28.6139, 77.2090)',
+          status: values.status,
+          orders: values.orders || 'None',
+          remarks: values.remarks || 'Logged from manager portal'
+        }
+        addFieldVisit(newVisit)
         setIsModalOpen(false)
         form.resetFields()
-        setTimeout(async () => {
-          await syncData()
-        }, 2000)
       } else {
         message.error('Failed to trigger webhook.')
       }

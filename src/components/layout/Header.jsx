@@ -154,8 +154,8 @@ function Header() {
         {/* User Avatar */}
         <Link to="/settings" className="flex items-center gap-3 pl-3 border-l border-slate-100 hover:opacity-80 transition-opacity">
           <div className="w-9 h-9 rounded-xl overflow-hidden bg-primary-100 flex items-center justify-center border border-primary-200">
-            {localStorage.getItem('profilePic') ? (
-              <img src={localStorage.getItem('profilePic')} alt="Profile" className="w-full h-full object-cover" />
+            {profile.profilePic ? (
+              <img src={profile.profilePic} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <User className="w-5 h-5 text-primary" />
             )}

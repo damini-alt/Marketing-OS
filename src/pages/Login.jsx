@@ -70,7 +70,7 @@ const Login = ({ onLogin }) => {
             localStorage.setItem('isAuth', 'true');
             onLogin();
           } else {
-            setError('Invalid credentials! Use admin / admin');
+            setError('Invalid credentials! Please select from the Demo Account dropdown above.');
             setLoading(false);
           }
         }, 800);
@@ -205,6 +205,25 @@ const Login = ({ onLogin }) => {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="flex flex-col gap-1.5 mb-1">
+                                <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest">Demo Credentials</label>
+                                <select 
+                                    onChange={(e) => {
+                                        if (e.target.value === 'admin') {
+                                            setUsername('admin');
+                                            setPassword('admin');
+                                        } else {
+                                            setUsername('');
+                                            setPassword('');
+                                        }
+                                    }}
+                                    className="w-full h-11 px-4 rounded-xl bg-slate-50/50 border border-slate-200/80 text-xs text-[#111834] font-bold outline-none focus:border-purple-500 focus:bg-white transition-all cursor-pointer"
+                                >
+                                    <option value="" className="bg-white">-- Select Demo Account --</option>
+                                    <option value="admin" className="bg-white">Administrator (admin / admin)</option>
+                                </select>
+                            </div>
+
                             <Input
                                 label="Username"
                                 type="text"

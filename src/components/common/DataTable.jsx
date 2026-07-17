@@ -16,6 +16,10 @@ function DataTable({
   rowKey = 'id',
 }) {
   const [searchText, setSearchText] = useState('')
+  const [paginationState, setPaginationState] = useState({
+    current: 1,
+    pageSize: pagination?.pageSize || 10,
+  })
 
   const handleSearch = (e) => {
     setSearchText(e.target.value)
@@ -72,7 +76,15 @@ function DataTable({
         dataSource={filteredData}
         rowKey={rowKey}
         loading={loading}
-        pagination={pagination}
+        pagination={{
+          ...paginationState,
+          showSizeChanger: true,
+          showTotal: (total) => `Total ${total} items`,
+          onChange: (page, size) => {
+            setPaginationState({ current: page, pageSize: size })
+          },
+          ...pagination
+        }}
         scroll={scroll}
         onRow={(record) => ({
           onClick: () => onRowClick && onRowClick(record),

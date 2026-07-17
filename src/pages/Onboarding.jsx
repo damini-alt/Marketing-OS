@@ -194,7 +194,7 @@ function Onboarding() {
     }
   ]
 
-  const filteredDealers = filterStatus ? dealers.filter(d => d.status === filterStatus) : dealers
+  const filteredDealers = filterStatus && filterStatus !== 'all' ? dealers.filter(d => d.status === filterStatus) : dealers
 
   // Stats calculation
   const totalRequests = dealers.length
@@ -277,6 +277,7 @@ function Onboarding() {
             allowClear
             onChange={setFilterStatus}
             options={[
+              { value: 'all', label: 'All Statuses' },
               { value: 'Verified', label: 'Verified' },
               { value: 'Pending', label: 'Pending Verification' },
               { value: 'Rejected', label: 'Rejected' },

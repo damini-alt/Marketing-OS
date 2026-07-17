@@ -183,8 +183,8 @@ function Campaigns() {
   }
 
   const filteredCampaigns = campaigns.filter((c) => {
-    if (filterStatus && c.status !== filterStatus) return false
-    if (filterType && c.campaign_type !== filterType) return false
+    if (filterStatus && filterStatus !== 'all' && c.status !== filterStatus) return false
+    if (filterType && filterType !== 'all' && c.campaign_type !== filterType) return false
     return true
   })
 
@@ -237,6 +237,7 @@ function Campaigns() {
             onChange={setFilterStatus}
             className="rounded-xl"
             options={[
+              { value: 'all', label: 'All Statuses' },
               { value: 'active', label: 'Active' },
               { value: 'planned', label: 'Planned' },
               { value: 'completed', label: 'Completed' },
@@ -250,6 +251,7 @@ function Campaigns() {
             onChange={setFilterType}
             className="rounded-xl"
             options={[
+              { value: 'all', label: 'All Types' },
               { value: 'festival', label: 'Festival' },
               { value: 'product', label: 'Product' },
               { value: 'discount', label: 'Discount' },

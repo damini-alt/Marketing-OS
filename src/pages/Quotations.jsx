@@ -57,11 +57,36 @@ function Quotations() {
                   type="text"
                   size="small"
                   icon={<Download className="w-4 h-4 text-green-600" />}
-                  onClick={() => {
-                    const a = document.createElement('a')
-                    a.href = record.pdf_url
-                    a.download = `${record.id}_Quotation.pdf`
-                    a.click()
+                  onClick={async () => {
+                    try {
+                      const response = await fetch(record.pdf_url)
+                      let text = await response.text()
+                      
+                      let cleanText = text
+                      const match = text.match(/```html([\s\S]*?)```/)
+                      if (match) {
+                        cleanText = match[1].trim()
+                      } else if (text.startsWith('```') && text.endsWith('```')) {
+                        cleanText = text.replace(/^```[a-z]*\n?|```$/g, '').trim()
+                      } else if (text.includes('```html')) {
+                        cleanText = text.replace(/```html/g, '').replace(/```/g, '').trim()
+                      }
+                      
+                      const blob = new Blob([cleanText], { type: 'text/html' })
+                      const blobUrl = window.URL.createObjectURL(blob)
+                      
+                      const a = document.createElement('a')
+                      a.href = blobUrl
+                      a.download = `${record.id}_Quotation.html`
+                      a.click()
+                      
+                      window.URL.revokeObjectURL(blobUrl)
+                    } catch (error) {
+                      const a = document.createElement('a')
+                      a.href = record.pdf_url
+                      a.download = `${record.id}_Quotation.pdf`
+                      a.click()
+                    }
                   }}
                 />
               </Tooltip>
@@ -74,7 +99,7 @@ function Quotations() {
     }
   ]
 
-  const filteredQuotes = filterStatus ? quotations.filter(q => q.status === filterStatus) : quotations
+  const filteredQuotes = filterStatus && filterStatus !== 'all' ? quotations.filter(q => q.status === filterStatus) : quotations
 
   const handleSubmit = async (values) => {
     setLoading(true)
@@ -137,6 +162,7 @@ function Quotations() {
             allowClear
             onChange={setFilterStatus}
             options={[
+              { value: 'all', label: 'All Statuses' },
               { value: 'Draft', label: 'Draft' },
               { value: 'Sent', label: 'Sent' },
               { value: 'Approved', label: 'Approved' },
