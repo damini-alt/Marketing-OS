@@ -8,6 +8,7 @@ import Modal from '../components/common/Modal'
 import Badge from '../components/common/Badge'
 import Skeleton from '../components/common/Skeleton'
 import { useStore } from '../hooks/useStore'
+import QuickPresets from '../components/common/QuickPresets'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -333,18 +334,7 @@ function Leads() {
         title={editingLead ? 'Edit Lead' : 'Add New Lead'}
         size="lg"
       >
-        <div className="mb-6 flex gap-2 flex-wrap">
-          <p className="w-full text-xs text-gray-400 mb-1 uppercase font-bold">Quick Fill Test Templates:</p>
-          <Button size="small" onClick={() => form.setFieldsValue({ name: 'Rohit Verma', email: 'rohit.v@example.com', phone: '9822334455', source: 'WhatsApp', status: 'new' })}>
-            High Intent (WA)
-          </Button>
-          <Button size="small" onClick={() => form.setFieldsValue({ name: 'Sneha Kapur', email: 'sneha.k@example.com', phone: '9911882233', source: 'Instagram', status: 'new' })}>
-            Inquiry (Insta)
-          </Button>
-          <Button size="small" onClick={() => form.setFieldsValue({ name: 'Vikram Singh', email: 'vikram.s@example.com', phone: '9733445566', source: 'Google Ads', status: 'new' })}>
-            Cold Lead (Ads)
-          </Button>
-        </div>
+        <QuickPresets type="leads" form={form} />
         <Form
           form={form}
           layout="vertical"
@@ -468,14 +458,11 @@ function Leads() {
             }
           </Form.Item>
 
-          <div className="flex justify-between items-center pt-4">
-            <Button type="dashed" onClick={() => form.setFieldsValue({ name: 'Amit Kumar', phone: '9876543210', email: 'amit@example.com', source: 'WhatsApp', status: 'new', created_date: '2026-05-20' })}>Fill Dummy Data</Button>
-            <div className="flex gap-3">
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit">
-                {editingLead ? 'Update Lead' : 'Add Lead'}
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="primary" htmlType="submit">
+              {editingLead ? 'Update Lead' : 'Add Lead'}
+            </Button>
           </div>
         </Form>
       </Modal>

@@ -5,6 +5,7 @@ import { Button, message, Tag, Space, Select, Input, Form, Divider } from 'antd'
 import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
+import QuickPresets from '../components/common/QuickPresets'
 
 const RENEWAL_WEBHOOK_URL = 'https://studio.pucho.ai/api/v1/webhooks/your-renewal-webhook-id'
 
@@ -69,15 +70,7 @@ function AMC() {
     }
   }
 
-  const handleFillDummy = () => {
-    form.setFieldsValue({
-      customer: 'Adani Power',
-      asset: 'Substation Transformer Maintenance',
-      endDate: '2026-06-18',
-      value: 185000,
-      status: 'Expiring'
-    })
-  }
+
 
   const columns = [
     { title: 'Contract ID', dataIndex: 'id', key: 'id', render: (text) => <span className="font-mono text-xs text-slate-600">{text}</span> },
@@ -208,13 +201,7 @@ function AMC() {
             type="primary" 
             icon={<Plus className="w-4 h-4" />} 
             onClick={() => {
-              form.setFieldsValue({
-                customer: 'Adani Power',
-                asset: 'Substation Transformer Maintenance',
-                endDate: '2026-06-18',
-                value: 185000,
-                status: 'Expiring'
-              })
+              form.resetFields()
               setIsModalOpen(true)
             }}
           >
@@ -230,6 +217,7 @@ function AMC() {
 
       {/* Add AMC Contract Modal */}
       <Modal title="Create New AMC / Service Contract" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <QuickPresets type="amc" form={form} />
         <Form form={form} layout="vertical" onFinish={handleAddContract}>
           <Form.Item name="customer" label="Customer / Corporate Client" rules={[{ required: true, message: 'Please input customer name' }]}>
             <Input placeholder="e.g. Tata Motors, Adani Power" />
@@ -252,12 +240,9 @@ function AMC() {
               <Select.Option value="Expired">Expired</Select.Option>
             </Select>
           </Form.Item>
-          <div className="flex justify-between items-center pt-4">
-            <Button type="dashed" onClick={handleFillDummy}>Fill Dummy Contract</Button>
-            <Space>
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit" loading={loading}>Save Contract</Button>
-            </Space>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="primary" htmlType="submit" loading={loading}>Save Contract</Button>
           </div>
         </Form>
       </Modal>

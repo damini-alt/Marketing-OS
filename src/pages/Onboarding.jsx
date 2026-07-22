@@ -6,6 +6,7 @@ import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
 import { useStore } from '../hooks/useStore'
+import QuickPresets from '../components/common/QuickPresets'
 
 const ONBOARDING_WEBHOOK_URL = 'https://studio.pucho.ai/api/v1/webhooks/6VuHiijlvnPWfqDry83nT'
 
@@ -114,14 +115,7 @@ function Onboarding() {
     }
   }
 
-  const handleFillDummy = () => {
-    form.setFieldsValue({
-      name: 'Krishna Machinery Store',
-      phone: '9345678901',
-      email: 'krishna.machinery@rediffmail.com',
-      documents: ['GST', 'PAN', 'Cheque']
-    })
-  }
+
 
   const columns = [
     { title: 'Onboarding ID', dataIndex: 'id', key: 'id', render: (text) => <span className="font-mono text-xs text-slate-600">{text}</span> },
@@ -154,6 +148,12 @@ function Onboarding() {
           <Tag color={status === 'Verified' ? 'green' : status === 'Pending' ? 'orange' : 'red'}>{status}</Tag>
         </Tooltip>
       )
+    },
+    {
+      title: 'Remarks',
+      dataIndex: 'remarks',
+      key: 'remarks',
+      render: (remarks) => <span className="text-sm text-slate-600 font-medium">{remarks || '-'}</span>
     },
     {
       title: 'Actions',
@@ -287,12 +287,7 @@ function Onboarding() {
             type="primary" 
             icon={<Plus className="w-4 h-4" />} 
             onClick={() => {
-              form.setFieldsValue({
-                name: 'Krishna Machinery Store',
-                phone: '9345678901',
-                email: 'krishna.machinery@rediffmail.com',
-                documents: ['GST', 'PAN', 'Cheque']
-              })
+              form.resetFields()
               setIsModalOpen(true)
             }}
           >
@@ -308,6 +303,7 @@ function Onboarding() {
 
       {/* Add Request Modal */}
       <Modal title="Create Dealer KYC Collection Request" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <QuickPresets type="onboarding" form={form} />
         <Form form={form} layout="vertical" onFinish={handleAddDealer}>
           <Form.Item name="name" label="Dealer / Distributor Business Name" rules={[{ required: true, message: 'Please enter business name' }]}>
             <Input placeholder="e.g. Krishna Machinery Store" />
@@ -328,12 +324,9 @@ function Onboarding() {
             </Select>
           </Form.Item>
           
-          <div className="flex justify-between items-center pt-4">
-            <Button type="dashed" onClick={handleFillDummy}>Fill Dummy Request</Button>
-            <Space>
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit" loading={loading}>Request KYC</Button>
-            </Space>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="primary" htmlType="submit" loading={loading}>Request KYC</Button>
           </div>
         </Form>
       </Modal>

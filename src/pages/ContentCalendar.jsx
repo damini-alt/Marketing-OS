@@ -8,6 +8,7 @@ import Badge from '../components/common/Badge'
 import Skeleton from '../components/common/Skeleton'
 import { useStore } from '../hooks/useStore'
 import { downloadImage } from '../utils/downloadUtils'
+import QuickPresets from '../components/common/QuickPresets'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -367,18 +368,7 @@ Do not copy the reference exactly. Create a fresh, unique, and high-quality desi
         title={editingContent ? 'Edit Content' : 'Schedule New Content'}
         size="lg"
       >
-        <div className="mb-6 flex gap-2 flex-wrap">
-          <p className="w-full text-xs text-gray-400 mb-1 uppercase font-bold">Quick Fill Test Templates:</p>
-          <Button size="small" onClick={() => form.setFieldsValue({ title: 'New Arrival Instagram', platform: 'Instagram', content_type: 'image', scheduled_date: '2024-06-01', scheduled_time: '18:00', caption: 'Check out our latest arrivals! 😍 #NewArrival #Summer2024' })}>
-            Insta Post
-          </Button>
-          <Button size="small" onClick={() => form.setFieldsValue({ title: 'B2B LinkedIn Update', platform: 'LinkedIn', content_type: 'text', scheduled_date: '2024-06-02', scheduled_time: '09:00', caption: 'We are proud to announce our new partnership. Looking forward to driving growth together!' })}>
-            LinkedIn Post
-          </Button>
-          <Button size="small" onClick={() => form.setFieldsValue({ title: 'WhatsApp Promo', platform: 'WhatsApp', content_type: 'image', scheduled_date: '2024-06-01', scheduled_time: '12:00', caption: 'Flash sale alert! Get 50% off for the next 2 hours only.' })}>
-            WhatsApp Alert
-          </Button>
-        </div>
+        <QuickPresets type="content" form={form} />
         <Form
           form={form}
           layout="vertical"
@@ -482,14 +472,11 @@ Do not copy the reference exactly. Create a fresh, unique, and high-quality desi
             </Select>
           </Form.Item>
 
-          <div className="flex justify-between items-center pt-4">
-            <Button type="dashed" onClick={() => form.setFieldsValue({ title: 'Dummy Content Post', platform: 'Instagram', content_type: 'image', scheduled_date: '2026-05-22', scheduled_time: '10:00', caption: 'This is a dummy caption for the content calendar post.', status: 'draft' })}>Fill Dummy Data</Button>
-            <div className="flex gap-3">
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit">
-                {editingContent ? 'Update Content' : 'Schedule Content'}
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="primary" htmlType="submit">
+              {editingContent ? 'Update Content' : 'Schedule Content'}
+            </Button>
           </div>
         </Form>
       </Modal>

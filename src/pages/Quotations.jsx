@@ -7,6 +7,7 @@ import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
 
 import { useStore } from '../hooks/useStore'
+import QuickPresets from '../components/common/QuickPresets'
 
 const WEBHOOK_URL = 'https://studio.pucho.ai/api/v1/webhooks/bNB6pScGn1uoOx5vVVMmO/sync'
 
@@ -101,37 +102,62 @@ function Quotations() {
 
   const filteredQuotes = filterStatus && filterStatus !== 'all' ? quotations.filter(q => q.status === filterStatus) : quotations
 
-  const handleSubmit = async (values) => {
-    setLoading(true)
-    try {
-      const response = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: values.customer,
-          email: values.email,
-          phone: values.phone,
-          product: values.product,
-          quantity: values.quantity,
-          unit_price: values.unit_price,
-          logo_url: values.logo_url || 'https://raw.githubusercontent.com/damini07le-byte/pucho-assets/main/logo.png'
-        }),
-      })
+  const addQuotationLocally = useStore(state => state.addQuotationLocally)
+  const removeQuotationLocally = useStore(state => state.removeQuotationLocally)
 
-      if (response.ok) {
-        message.success('Quotation generated and sent successfully!')
-        setIsModalOpen(false)
-        form.resetFields()
-        await syncData()
-      } else {
-        message.error('Failed to generate quotation.')
-      }
-    } catch (error) {
-      message.error('Error sending request.')
-      console.error(error)
-    } finally {
-      setLoading(false)
+  const handleSubmit = async (values) => {
+    // 1. Create a temporary quotation with "Generating..." status
+    const tempId = `QT-TEMP-${Date.now()}`
+    const tempQuote = {
+      id: tempId,
+      customer: values.customer,
+      email: values.email,
+      phone: values.phone,
+      product: values.product,
+      date: new Date().toISOString().split('T')[0],
+      amount: Number(values.quantity) * Number(values.unit_price),
+      gst: Math.round(Number(values.quantity) * Number(values.unit_price) * 0.18),
+      status: 'Generating...',
+      pdf_url: null
     }
+
+    // 2. Add it to the local store list immediately
+    addQuotationLocally(tempQuote)
+
+    // 3. Close the modal and reset form fields so the user sees it in the list immediately
+    setIsModalOpen(false)
+    form.resetFields()
+    message.info('Generating and sending quotation in background...')
+
+    // 4. Run the webhook in the background asynchronously
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: values.customer,
+        email: values.email,
+        phone: values.phone,
+        product: values.product,
+        quantity: values.quantity,
+        unit_price: values.unit_price,
+        logo_url: values.logo_url || 'https://raw.githubusercontent.com/damini07le-byte/pucho-assets/main/logo.png'
+      }),
+    })
+      .then(async (response) => {
+        if (response.ok) {
+          message.success(`Quotation generated and sent to ${values.customer}!`)
+          // Fetch updated data from Google Sheets to replace the temp entry with the real one
+          await syncData()
+        } else {
+          message.error(`Failed to generate quotation for ${values.customer}.`)
+          removeQuotationLocally(tempId)
+        }
+      })
+      .catch((error) => {
+        message.error(`Error generating quotation for ${values.customer}.`)
+        console.error(error)
+        removeQuotationLocally(tempId)
+      })
   }
 
   return (
@@ -169,7 +195,10 @@ function Quotations() {
               { value: 'Rejected', label: 'Rejected' },
             ]}
           />
-          <Button type="primary" icon={<Plus className="w-4 h-4" />} onClick={() => setIsModalOpen(true)}>
+          <Button type="primary" icon={<Plus className="w-4 h-4" />} onClick={() => {
+            form.resetFields()
+            setIsModalOpen(true)
+          }}>
             Create Quote
           </Button>
         </div>
@@ -186,6 +215,7 @@ function Quotations() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       >
+        <QuickPresets type="quotations" form={form} />
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="customer" label="Customer Name" rules={[{ required: true }]}>
             <Input placeholder="Enter customer name" />
@@ -219,15 +249,6 @@ function Quotations() {
           </Form.Item>
 
           <div className="flex justify-end gap-2 mt-2">
-            <Button onClick={() => form.setFieldsValue({
-              customer: 'Test Customer',
-              email: 'test@example.com',
-              phone: '9876543210',
-              product: 'Steel Pipes',
-              quantity: 10,
-              unit_price: 500,
-              logo_url: 'https://raw.githubusercontent.com/damini07le-byte/pucho-assets/main/logo.png'
-            })}>Fill Dummy Data</Button>
             <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={loading}>
               Generate & Send Quote

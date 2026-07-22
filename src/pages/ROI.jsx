@@ -89,10 +89,22 @@ function ROI() {
     Revenue: Number(r.total_revenue || 0),
   }))
 
-  const roiDistribution = (roi || []).map((r) => ({
-    name: (r.campaign_name || 'Unknown').substring(0, 8),
-    value: Math.max(0, Number(r.roi_percentage || 0)),
-  }))
+  const roiDistribution = (roi || []).map((r) => {
+    const cost = Number(r.total_cost || 0)
+    const rev = Number(r.total_revenue || 0)
+    const calcRoi = cost > 0 ? Math.round(((rev - cost) / cost) * 100) : (rev > 0 ? 100 : 0)
+    const val = Number(r.roi_percentage) || calcRoi
+    // Pie chart slice magnitude: prefer revenue, or ROI %, or cost to guarantee visual distribution
+    const sliceVal = rev > 0 ? rev : (val > 0 ? val * 1000 : (cost > 0 ? cost : 10000))
+
+    return {
+      name: (r.campaign_name || 'Unknown').length > 10 ? (r.campaign_name || 'Unknown').substring(0, 10) + '...' : (r.campaign_name || 'Unknown'),
+      value: Math.max(10, sliceVal),
+      roiVal: val,
+      revenue: rev,
+      cost: cost,
+    }
+  })
 
   const filteredROI = selectedCampaign
     ? (roi || []).filter((r) => r.campaign_id === selectedCampaign)

@@ -6,6 +6,7 @@ import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
 import { useStore } from '../hooks/useStore'
+import QuickPresets from '../components/common/QuickPresets'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -19,8 +20,6 @@ function Testimonials() {
   const syncData = useStore(state => state.syncData)
 
   const [filterStatus, setFilterStatus] = useState(null)
-
-
   useEffect(() => {
     syncData()
   }, [])
@@ -157,6 +156,8 @@ function Testimonials() {
       <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100">
         <DataTable columns={columns} data={filteredReviews} rowKey="id" />
       </div>
+
+
 
 
     </motion.div>

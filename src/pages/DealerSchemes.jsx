@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, IndianRupee, Award, CheckCircle, AlertTriangle, Send } from 'lucide-react'
-import { Button, message, Tag, Space, Input, Form, Progress, Divider, Tooltip } from 'antd'
+import { Button, message, Tag, Space, Input, Form, Progress, Divider, Tooltip, Select } from 'antd'
 import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
 import { useStore } from '../hooks/useStore'
+import QuickPresets from '../components/common/QuickPresets'
 
 const WEBHOOK_URL = 'https://studio.pucho.ai/api/v1/webhooks/0a3okVuPFHgbgCR3KumJ0'
 
@@ -27,6 +28,30 @@ function DealerSchemes() {
 
   const schemes = useStore(state => state.dealerSchemes)
   const syncData = useStore(state => state.syncData)
+  const onboarding = useStore(state => state.onboarding) || []
+  const leads = useStore(state => state.leads) || []
+
+  // Map of known dealers/customers: name -> email
+  const knownDealers = new Map()
+  onboarding.forEach(o => {
+    if (o.name && o.email) {
+      knownDealers.set(o.name.trim(), o.email.trim())
+    }
+  })
+  leads.forEach(l => {
+    if (l.name && l.email) {
+      knownDealers.set(l.name.trim(), l.email.trim())
+    }
+  })
+  schemes.forEach(s => {
+    if (s.dealers) {
+      s.dealers.forEach(d => {
+        if (d.name && d.email) {
+          knownDealers.set(d.name.trim(), d.email.trim())
+        }
+      })
+    }
+  })
 
   const claims = [
     { id: 'CLM001', dealer: 'Rajesh Enterprises', scheme: 'Summer Cooler Promo', claimed: 10000, verified: 10000, status: 'Approved' },
@@ -111,18 +136,7 @@ function DealerSchemes() {
     setDealerRows(updated)
   }
 
-  const handleFillDummy = () => {
-    form.setFieldsValue({
-      scheme_name: 'Monsoon Dhamaka 2026',
-      product: 'Smart Coolers V2',
-      discount: '20%',
-      valid_till: '2026-08-15'
-    });
-    setDealerRows([
-      { name: 'Balaji Traders', email: 'balaji@example.com' },
-      { name: 'Kapoor & Sons', email: 'kapoor@example.com' }
-    ]);
-  };
+
 
 
   const handleSubmit = async (values) => {
@@ -215,6 +229,7 @@ function DealerSchemes() {
 
       {/* Broadcast Modal */}
       <Modal title="Broadcast Scheme to Dealers" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <QuickPresets type="dealerSchemes" form={form} />
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
           <Form.Item name="scheme_name" label="Scheme Name" rules={[{ required: true }]}>
             <Input placeholder="e.g. Summer Discount 2026" />
@@ -234,11 +249,22 @@ function DealerSchemes() {
           <Divider orientation="left" className="text-sm text-slate-500">Dealers List</Divider>
           {dealerRows.map((dealer, index) => (
             <div key={index} className="flex gap-2 mb-2 items-center">
-              <Input
+              <Select
+                showSearch
+                mode="combobox"
                 placeholder="Dealer Name"
                 value={dealer.name}
-                onChange={(e) => updateDealerRow(index, 'name', e.target.value)}
+                onChange={(val) => {
+                  updateDealerRow(index, 'name', val)
+                  if (knownDealers.has(val)) {
+                    updateDealerRow(index, 'email', knownDealers.get(val))
+                  }
+                }}
+                options={Array.from(knownDealers.keys()).map(name => ({ value: name, label: name }))}
                 style={{ flex: 1 }}
+                filterOption={(input, option) =>
+                  (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                }
               />
               <Input
                 placeholder="Dealer Email"
@@ -253,14 +279,11 @@ function DealerSchemes() {
           ))}
           <Button type="dashed" onClick={addDealerRow} block className="mb-4">+ Add Dealer</Button>
 
-          <div className="flex justify-between items-center mt-2">
-            <Button type="dashed" onClick={handleFillDummy}>Fill Dummy Scheme</Button>
-            <div className="flex gap-2">
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit" loading={loading} icon={<Send className="w-4 h-4" />}>
-                Send Scheme Broadcast
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2 mt-2">
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="primary" htmlType="submit" loading={loading} icon={<Send className="w-4 h-4" />}>
+              Send Scheme Broadcast
+            </Button>
           </div>
         </Form>
       </Modal>

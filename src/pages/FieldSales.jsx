@@ -6,6 +6,7 @@ import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
 import { useStore } from '../hooks/useStore'
+import QuickPresets from '../components/common/QuickPresets'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -110,16 +111,7 @@ function FieldSales() {
     }
   }
 
-  const handleFillDummy = () => {
-    form.setFieldsValue({
-      rep: 'Priya Sharma',
-      customer: 'Metro Hypermarket',
-      status: 'Completed',
-      orders: '₹12,500',
-      location: 'Noida (28.5355, 77.3910)',
-      remarks: 'Product catalogue shared and bulk order finalized.'
-    })
-  }
+
 
   // Calculate Stats
   const activeReps = new Set(visits.map(v => v.rep)).size
@@ -188,14 +180,7 @@ function FieldSales() {
           <p className="text-sm text-slate-500 font-medium">Real-time GPS validation and order reporting dashboard</p>
         </div>
         <Button type="primary" icon={<Plus className="w-4 h-4" />} onClick={() => {
-          form.setFieldsValue({
-            rep: 'Priya Sharma',
-            customer: 'Metro Hypermarket',
-            status: 'Completed',
-            orders: '₹12,500',
-            location: 'Noida (28.5355, 77.3910)',
-            remarks: 'Product catalogue shared and bulk order finalized.'
-          })
+          form.resetFields()
           setIsModalOpen(true)
         }}>
           Log Visit (Check-In)
@@ -209,6 +194,7 @@ function FieldSales() {
 
       {/* Log Visit Modal */}
       <Modal title="Log / Assign New Field Visit" isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <QuickPresets type="fieldSales" form={form} />
         <Form form={form} layout="vertical" onFinish={handleLogVisit}>
           <Form.Item name="rep" label="Sales Representative" rules={[{ required: true, message: 'Please select sales rep' }]}>
             <Select placeholder="Select representative">
@@ -246,7 +232,6 @@ function FieldSales() {
           </Form.Item>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button onClick={handleFillDummy}>Fill Dummy Check-In</Button>
             <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="primary" htmlType="submit" loading={loading} icon={<Send className="w-4 h-4" />}>
               Submit Check-In Log

@@ -10,6 +10,7 @@ import Badge from '../components/common/Badge'
 import Skeleton from '../components/common/Skeleton'
 import { useStore } from '../hooks/useStore'
 import { downloadImage } from '../utils/downloadUtils'
+import QuickPresets from '../components/common/QuickPresets'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12 },
@@ -288,18 +289,7 @@ function Campaigns() {
         title={editingCampaign ? 'Edit Campaign' : 'Create New Campaign'}
         size="lg"
       >
-        <div className="mb-6 flex gap-2 flex-wrap">
-          <p className="w-full text-xs text-gray-400 mb-1 uppercase font-bold">Quick Fill Test Templates:</p>
-          <Button size="small" onClick={() => form.setFieldsValue({ campaign_name: 'Summer Sale 2024', type: 'promotion', budget: 50000, start_date: '2024-06-01', end_date: '2024-06-30' })}>
-            Promotion
-          </Button>
-          <Button size="small" onClick={() => form.setFieldsValue({ campaign_name: 'New Product Launch', type: 'product', budget: 100000, start_date: '2024-07-15', end_date: '2024-08-15' })}>
-            Product
-          </Button>
-          <Button size="small" onClick={() => form.setFieldsValue({ campaign_name: 'Newsletter July', type: 'newsletter', budget: 5000, start_date: '2024-07-01', end_date: '2024-07-01' })}>
-            Newsletter
-          </Button>
-        </div>
+        <QuickPresets type="campaigns" form={form} />
         <Form
           form={form}
           layout="vertical"
@@ -397,14 +387,11 @@ function Campaigns() {
             <Input placeholder="e.g., All customers, New leads, Young professionals" size="large" />
           </Form.Item>
 
-          <div className="flex justify-between items-center pt-4">
-            <Button type="dashed" onClick={() => form.setFieldsValue({ campaign_name: 'Dummy Mega Sale 2026', campaign_type: 'discount', start_date: '2026-06-01', end_date: '2026-06-30', budget: 150000, status: 'planned', channels: ['WhatsApp', 'Instagram'], target_audience: 'Existing Customers' })}>Fill Dummy Data</Button>
-            <div className="flex gap-3">
-              <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
-              <Button type="primary" htmlType="submit">
-                {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="primary" htmlType="submit">
+              {editingCampaign ? 'Update Campaign' : 'Create Campaign'}
+            </Button>
           </div>
         </Form>
       </Modal>

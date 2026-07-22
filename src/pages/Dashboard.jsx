@@ -18,6 +18,7 @@ import {
   MapPin,
   UserCheck,
   Star,
+  MessageCircle,
 } from 'lucide-react'
 import { Tooltip, Dropdown, message } from 'antd'
 import StatCard from '../components/common/StatCard'
@@ -190,10 +191,11 @@ function Dashboard() {
                 <div key={item.name} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${colors[index % colors.length]}`}>
-                      {item.name === 'Instagram' && <Instagram className="w-4 h-4" />}
-                      {item.name === 'Facebook' && <Facebook className="w-4 h-4" />}
-                      {item.name === 'Google Ads' && <Globe className="w-4 h-4" />}
-                      {item.name !== 'Instagram' && item.name !== 'Facebook' && item.name !== 'Google Ads' && <Radio className="w-4 h-4" />}
+                      {item.name.toLowerCase() === 'whatsapp' && <MessageCircle className="w-4 h-4" />}
+                      {item.name.toLowerCase() === 'instagram' && <Instagram className="w-4 h-4" />}
+                      {item.name.toLowerCase() === 'facebook' && <Facebook className="w-4 h-4" />}
+                      {item.name.toLowerCase() === 'google ads' && <Globe className="w-4 h-4" />}
+                      {item.name.toLowerCase() !== 'whatsapp' && item.name.toLowerCase() !== 'instagram' && item.name.toLowerCase() !== 'facebook' && item.name.toLowerCase() !== 'google ads' && <Radio className="w-4 h-4" />}
                     </div>
                     <span className="font-medium text-slate-700">{item.name}</span>
                   </div>

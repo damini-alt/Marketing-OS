@@ -23,13 +23,24 @@ import { useStore } from './hooks/useStore'
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('isAuth') === 'true')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const { initializeData } = useStore()
+  const { initializeData, syncData } = useStore()
 
   useEffect(() => {
     if (isAuthenticated) {
       initializeData()
     }
   }, [initializeData, isAuthenticated])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+
+    // Background polling: sync data from Google Sheets every 10 seconds
+    const intervalId = setInterval(() => {
+      syncData().catch(err => console.error("Auto-sync error:", err))
+    }, 10000)
+
+    return () => clearInterval(intervalId)
+  }, [isAuthenticated, syncData])
 
   return (
     <>
