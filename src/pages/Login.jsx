@@ -114,7 +114,7 @@ const Login = ({ onLogin }) => {
                 {/* Top Left - Woman Green Beanie */}
                 <Mascot
                     imageSrc={mascot1}
-                    x="top-[4%] left-4 md:top-[2%] md:left-[1%]"
+                    x="top-[8%] left-8 md:top-[6%] md:left-[5%]"
                     delay={0}
                     size="w-12 h-12 md:w-16 md:h-16"
                     cursorColor="text-blue-500"
@@ -124,7 +124,7 @@ const Login = ({ onLogin }) => {
                 {/* Top Center-Right - Man Cap */}
                 <Mascot
                     imageSrc={mascot5}
-                    x="top-[4%] right-4 md:top-[2%] md:right-[1%]"
+                    x="top-[8%] right-8 md:top-[6%] md:right-[5%]"
                     delay={1.5}
                     size="w-12 h-12 md:w-16 md:h-16"
                     cursorColor="text-purple-500"
@@ -134,7 +134,7 @@ const Login = ({ onLogin }) => {
                 {/* Bottom Center-Left - Man Turban */}
                 <Mascot
                     imageSrc={mascot3}
-                    x="bottom-[4%] left-2 md:bottom-[2%] md:left-[2%]"
+                    x="bottom-[8%] left-8 md:bottom-[6%] md:left-[5%]"
                     delay={0.8}
                     size="w-10 h-10 md:w-16 md:h-16"
                     cursorColor="text-yellow-500"
@@ -144,7 +144,7 @@ const Login = ({ onLogin }) => {
                 {/* Bottom Right - Woman Hijab */}
                 <Mascot
                     imageSrc={mascot4}
-                    x="bottom-[16%] right-2 md:bottom-[12%] md:right-[2%]"
+                    x="bottom-[22%] right-8 md:bottom-[16%] md:right-[5%]"
                     delay={2.2}
                     size="w-10 h-10 md:w-16 md:h-16"
                     cursorColor="text-green-500"
