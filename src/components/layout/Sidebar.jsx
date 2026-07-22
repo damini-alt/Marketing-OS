@@ -86,15 +86,6 @@ function Sidebar({ collapsed, onCollapse }) {
       {/* Bottom Actions */}
       <div className="flex flex-col mt-auto pb-4 px-4 space-y-1.5">
         <button
-          onClick={() => { localStorage.removeItem('isAuth'); window.location.reload(); }}
-          className={`h-12 rounded-xl flex items-center gap-3 text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all font-medium text-sm ${collapsed ? 'justify-center px-0' : 'px-4'}`}
-          title="Logout"
-        >
-          <LogOut className="w-5 h-5 flex-shrink-0" />
-          {!collapsed && <span>Logout</span>}
-        </button>
-
-        <button
           onClick={() => onCollapse(!collapsed)}
           className="h-10 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all border border-slate-100"
           title="Collapse"
@@ -107,6 +98,15 @@ function Sidebar({ collapsed, onCollapse }) {
               <span className="text-xs uppercase tracking-wider font-semibold">Collapse</span>
             </>
           )}
+        </button>
+
+        <button
+          onClick={() => { localStorage.removeItem('isAuth'); window.location.reload(); }}
+          className={`h-12 rounded-xl flex items-center gap-3 text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all font-medium text-sm ${collapsed ? 'justify-center px-0' : 'px-4'}`}
+          title="Logout"
+        >
+          <LogOut className="w-5 h-5 flex-shrink-0" />
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>
