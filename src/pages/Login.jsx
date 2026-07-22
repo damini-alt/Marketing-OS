@@ -144,7 +144,7 @@ const Login = ({ onLogin }) => {
                 {/* Bottom Right - Woman Hijab */}
                 <Mascot
                     imageSrc={mascot4}
-                    x="bottom-[4%] right-2 md:bottom-[2%] md:right-[2%]"
+                    x="bottom-[16%] right-2 md:bottom-[12%] md:right-[2%]"
                     delay={2.2}
                     size="w-10 h-10 md:w-16 md:h-16"
                     cursorColor="text-green-500"
