@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Edit, Phone, Mail, MessageCircle, UserPlus, Filter, Trash2, IndianRupee } from 'lucide-react'
-import { Button, message, Avatar, Tag, Space, Select, Input, Form, Popconfirm } from 'antd'
+import { Plus, Edit, Phone, Mail, MessageCircle, UserPlus, Filter, Trash2, IndianRupee, MessageSquare } from 'lucide-react'
+import { Button, message, Avatar, Tag, Space, Select, Input, Form, Popconfirm, Drawer, Timeline } from 'antd'
 import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
 import Modal from '../components/common/Modal'
@@ -15,26 +15,31 @@ const pageVariants = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 }
 
-const sourceIcons = {
-  WhatsApp: { icon: MessageCircle, color: 'text-green-600 bg-green-50' },
-  Instagram: { icon: MessageCircle, color: 'text-pink-600 bg-pink-50' },
-  Facebook: { icon: MessageCircle, color: 'text-primary-600 bg-primary-50' },
-  'Google Ads': { icon: MessageCircle, color: 'text-red-600 bg-red-50' },
-}
-
 function Leads() {
-  const { leads, campaigns, addLead, updateLead, deleteLead, loading } = useStore()
+  const { leads, campaigns, addLead, updateLead, deleteLead, loading, initialLoading, leadComments, addLeadComment, getLeadComments } = useStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingLead, setEditingLead] = useState(null)
   const [form] = Form.useForm()
   const [filterStatus, setFilterStatus] = useState(null)
   const [filterSource, setFilterSource] = useState(null)
+  
+  // Comments Drawer States
+  const [selectedLeadForComments, setSelectedLeadForComments] = useState(null)
+  const [newCommentText, setNewCommentText] = useState('')
+
+  const role = localStorage.getItem('userRole') || 'admin'
+
+  // Filter leads first to determine stats visibility
+  const displayedLeads = leads.filter((l) => {
+    if (role === 'executive' && l.assigned_to !== 'executive') return false
+    return true
+  })
 
   const stats = {
-    total: leads.length,
-    new: leads.filter((l) => l.status === 'new').length,
-    converted: leads.filter((l) => l.status === 'converted').length,
-    revenue: leads.reduce((sum, l) => sum + (parseFloat(l.revenue) || 0), 0),
+    total: displayedLeads.length,
+    new: displayedLeads.filter((l) => l.status === 'new').length,
+    converted: displayedLeads.filter((l) => l.status === 'converted').length,
+    revenue: displayedLeads.reduce((sum, l) => sum + (parseFloat(l.revenue) || 0), 0),
   }
 
   const columns = [
@@ -79,13 +84,6 @@ function Leads() {
       title: 'Source',
       dataIndex: 'source',
       key: 'source',
-      filters: [
-        { text: 'WhatsApp', value: 'WhatsApp' },
-        { text: 'Instagram', value: 'Instagram' },
-        { text: 'Facebook', value: 'Facebook' },
-        { text: 'Google Ads', value: 'Google Ads' },
-      ],
-      onFilter: (value, record) => record.source === value,
       render: (source) => <Badge status={source} />,
     },
     {
@@ -100,6 +98,16 @@ function Leads() {
           </span>
         )
       },
+    },
+    {
+      title: 'Assignee',
+      dataIndex: 'assigned_to',
+      key: 'assigned_to',
+      render: (assignee) => (
+        <span className="capitalize text-sm font-medium text-slate-700">
+          {assignee === 'executive' ? 'Executive' : 'Admin'}
+        </span>
+      ),
     },
     {
       title: 'Status',
@@ -127,18 +135,45 @@ function Leads() {
       ),
     },
     {
+      title: 'UTM Attribution',
+      key: 'utm',
+      render: (_, record) => {
+        if (!record.utm_source && !record.utm_campaign) return <span className="text-gray-400">-</span>;
+        return (
+          <div className="flex flex-col gap-1">
+            {record.utm_source && (
+              <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono w-max">
+                src: {record.utm_source}
+              </span>
+            )}
+            {record.utm_campaign && (
+              <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-100 px-1.5 py-0.5 rounded font-bold w-max">
+                cmp: {record.utm_campaign}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      title: 'Touch Count',
+      dataIndex: 'touch_count',
+      key: 'touch_count',
+      sorter: (a, b) => (a.touch_count || 1) - (b.touch_count || 1),
+      render: (touch_count) => (
+        <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+          (touch_count || 1) > 1 ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-gray-100 text-gray-700'
+        }`}>
+          {touch_count || 1}
+        </span>
+      ),
+    },
+    {
       title: 'Created',
       dataIndex: 'created_date',
       key: 'created_date',
       sorter: (a, b) => new Date(a.created_date) - new Date(b.created_date),
       render: (date) => <span className="text-xs text-gray-500">{date ? new Date(date).toLocaleDateString('en-IN') : '-'}</span>,
-    },
-    {
-      title: 'Converted Date',
-      dataIndex: 'converted_date',
-      key: 'converted_date',
-      sorter: (a, b) => new Date(a.converted_date) - new Date(b.converted_date),
-      render: (date) => <span className="text-xs text-green-600 font-medium">{date ? new Date(date).toLocaleDateString('en-IN') : '-'}</span>,
     },
     {
       title: 'Actions',
@@ -153,6 +188,16 @@ function Leads() {
               e.stopPropagation()
               handleEdit(record)
             }}
+          />
+          <Button
+            type="text"
+            size="small"
+            icon={<MessageSquare className="w-4 h-4 text-[#5d2a23]" />}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleOpenComments(record)
+            }}
+            title="Comments & Timeline"
           />
           <Button
             type="text"
@@ -198,20 +243,33 @@ function Leads() {
   const handleAdd = () => {
     setEditingLead(null)
     form.resetFields()
-    // Auto-fill today's date for new leads
     form.setFieldsValue({ 
       created_date: new Date().toISOString().split('T')[0],
-      status: 'new'
+      status: 'new',
+      assigned_to: 'admin'
     })
     setIsModalOpen(true)
   }
-
-
 
   const handleEdit = (lead) => {
     setEditingLead(lead)
     form.setFieldsValue(lead)
     setIsModalOpen(true)
+  }
+
+  const handleOpenComments = (lead) => {
+    setSelectedLeadForComments(lead)
+    getLeadComments(lead.lead_id)
+    setNewCommentText('')
+  }
+
+  const handleAddComment = () => {
+    if (!newCommentText.trim() || !selectedLeadForComments) return
+    const authorRole = localStorage.getItem('userRole') === 'executive' ? 'Marketing Executive' : 'Admin'
+    const authorName = localStorage.getItem('adminName') || authorRole
+    addLeadComment(selectedLeadForComments.lead_id, newCommentText.trim(), authorName)
+    setNewCommentText('')
+    message.success('Comment added')
   }
 
   const handleSubmit = async (values) => {
@@ -226,7 +284,7 @@ function Leads() {
     form.resetFields()
   }
 
-  const filteredLeads = leads.filter((l) => {
+  const filteredLeads = displayedLeads.filter((l) => {
     if (filterStatus && filterStatus !== 'all' && l.status !== filterStatus) return false
     if (filterSource && filterSource !== 'all' && l.source !== filterSource) return false
     return true
@@ -292,7 +350,7 @@ function Leads() {
           />
           <Select
             placeholder="Source"
-            style={{ width: 140 }}
+            style={{ width: 160 }}
             allowClear
             onChange={setFilterSource}
             className="rounded-xl"
@@ -302,6 +360,12 @@ function Leads() {
               { value: 'Instagram', label: 'Instagram' },
               { value: 'Facebook', label: 'Facebook' },
               { value: 'Google Ads', label: 'Google Ads' },
+              { value: 'TradeIndia', label: 'TradeIndia' },
+              { value: 'Meta Lead Forms', label: 'Meta Lead Forms' },
+              { value: 'Website', label: 'Website' },
+              { value: 'LinkedIn', label: 'LinkedIn' },
+              { value: 'API', label: 'API' },
+              { value: 'Referral', label: 'Referral' },
             ]}
           />
           <Button
@@ -316,7 +380,7 @@ function Leads() {
       </div>
 
       {/* Table */}
-      {loading ? (
+      {initialLoading ? (
         <Skeleton variant="table" />
       ) : (
         <DataTable
@@ -377,6 +441,11 @@ function Leads() {
                 <Select.Option value="Instagram">Instagram</Select.Option>
                 <Select.Option value="Facebook">Facebook</Select.Option>
                 <Select.Option value="Google Ads">Google Ads</Select.Option>
+                <Select.Option value="TradeIndia">TradeIndia</Select.Option>
+                <Select.Option value="Meta Lead Forms">Meta Lead Forms</Select.Option>
+                <Select.Option value="Website">Website</Select.Option>
+                <Select.Option value="LinkedIn">LinkedIn</Select.Option>
+                <Select.Option value="API">API</Select.Option>
                 <Select.Option value="Referral">Referral</Select.Option>
               </Select>
             </Form.Item>
@@ -394,19 +463,32 @@ function Leads() {
             </Form.Item>
           </div>
 
-          <Form.Item
-            name="status"
-            label="Status"
-            initialValue="new"
-          >
-            <Select size="large">
-              <Select.Option value="new">New</Select.Option>
-              <Select.Option value="contacted">Contacted</Select.Option>
-              <Select.Option value="qualified">Qualified</Select.Option>
-              <Select.Option value="converted">Converted</Select.Option>
-              <Select.Option value="lost">Lost</Select.Option>
-            </Select>
-          </Form.Item>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Form.Item
+              name="status"
+              label="Status"
+              initialValue="new"
+            >
+              <Select size="large">
+                <Select.Option value="new">New</Select.Option>
+                <Select.Option value="contacted">Contacted</Select.Option>
+                <Select.Option value="qualified">Qualified</Select.Option>
+                <Select.Option value="converted">Converted</Select.Option>
+                <Select.Option value="lost">Lost</Select.Option>
+              </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="assigned_to"
+              label="Assigned To"
+              rules={[{ required: true, message: 'Please select assignee' }]}
+              initialValue="admin"
+            >
+              <Select size="large">
+                <Select.Option value="admin">Admin</Select.Option>
+              </Select>
+            </Form.Item>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Form.Item
@@ -466,8 +548,139 @@ function Leads() {
           </div>
         </Form>
       </Modal>
+
+      {/* Comments & Timeline Drawer */}
+      <Drawer
+        title={`Comments & Timeline - ${selectedLeadForComments?.name}`}
+        placement="right"
+        width={450}
+        onClose={() => setSelectedLeadForComments(null)}
+        open={!!selectedLeadForComments}
+      >
+        {selectedLeadForComments && (
+          <div className="flex flex-col h-full justify-between">
+            <div className="space-y-6 overflow-y-auto flex-1 pr-2 pb-4">
+              {/* Lead Summary Info */}
+              <div className="bg-slate-50 border border-slate-100 rounded-2xl p-4">
+                <h4 className="font-bold text-slate-800 mb-2 text-sm text-primary flex justify-between items-center">
+                  <span>Lead Details</span>
+                  <span className="bg-primary-50 text-primary border border-primary-100 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                    Touch Count: {selectedLeadForComments.touch_count || 1}
+                  </span>
+                </h4>
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-slate-400 font-medium block">Source</span>
+                    <Badge status={selectedLeadForComments.source} size="sm" />
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium block">Status</span>
+                    <Badge status={selectedLeadForComments.status} size="sm" />
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium block">Assigned To</span>
+                    <span className="text-slate-700 font-semibold capitalize">{selectedLeadForComments.assigned_to || 'Admin'}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 font-medium block">Revenue</span>
+                    <span className="text-slate-700 font-semibold">₹{(selectedLeadForComments.revenue || 0).toLocaleString()}</span>
+                  </div>
+                </div>
+
+                {/* UTM Attribution Parameters */}
+                {(selectedLeadForComments.utm_source || selectedLeadForComments.utm_campaign) && (
+                  <div className="mt-4 pt-3 border-t border-slate-200/60 text-xs">
+                    <span className="text-slate-400 font-medium block mb-1">UTM Attribution</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedLeadForComments.utm_source && (
+                        <span className="bg-slate-200/60 text-slate-700 px-2 py-0.5 rounded font-mono text-[10px]">
+                          source: {selectedLeadForComments.utm_source}
+                        </span>
+                      )}
+                      {selectedLeadForComments.utm_medium && (
+                        <span className="bg-slate-200/60 text-slate-700 px-2 py-0.5 rounded font-mono text-[10px]">
+                          medium: {selectedLeadForComments.utm_medium}
+                        </span>
+                      )}
+                      {selectedLeadForComments.utm_campaign && (
+                        <span className="bg-amber-50 text-amber-700 border border-amber-100 px-2 py-0.5 rounded font-bold text-[10px]">
+                          campaign: {selectedLeadForComments.utm_campaign}
+                        </span>
+                      )}
+                      {selectedLeadForComments.utm_content && (
+                        <span className="bg-slate-200/60 text-slate-700 px-2 py-0.5 rounded font-mono text-[10px]">
+                          content: {selectedLeadForComments.utm_content}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Timeline list */}
+              <div>
+                <h4 className="font-bold text-slate-800 mb-4 text-sm">Activities & Internal Notes</h4>
+                <Timeline>
+                  <Timeline.Item color="blue">
+                    <div className="text-xs">
+                      <p className="font-semibold text-slate-700">Lead Created</p>
+                      <p className="text-slate-500">Source: {selectedLeadForComments.source}</p>
+                      <span className="text-[10px] text-slate-400">{selectedLeadForComments.created_date}</span>
+                    </div>
+                  </Timeline.Item>
+
+                  {(leadComments[selectedLeadForComments.lead_id] || []).map((c) => (
+                    <Timeline.Item key={c.id} color="green">
+                      <div className="text-xs">
+                        <p className="font-semibold text-slate-700">{c.author}</p>
+                        <p className="text-slate-600 bg-emerald-50/50 p-2 rounded border border-emerald-100/50 mt-1 leading-relaxed">
+                          {c.text}
+                        </p>
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(c.timestamp).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                    </Timeline.Item>
+                  ))}
+                </Timeline>
+
+                {(!leadComments[selectedLeadForComments.lead_id] || leadComments[selectedLeadForComments.lead_id].length === 0) && (
+                  <div className="text-center py-6 text-slate-400 text-xs">
+                    No comments found. Add a note below.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Input area */}
+            <div className="border-t border-slate-100 pt-4 flex gap-2">
+              <Input.TextArea
+                rows={2}
+                placeholder="Type internal notes..."
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                onPressEnter={(e) => {
+                  if (!e.shiftKey) {
+                    e.preventDefault();
+                    handleAddComment();
+                  }
+                }}
+              />
+              <Button
+                type="primary"
+                onClick={handleAddComment}
+                disabled={!newCommentText.trim()}
+                className="h-auto px-4"
+              >
+                Send
+              </Button>
+            </div>
+          </div>
+        )}
+      </Drawer>
     </motion.div>
   )
 }
 
 export default Leads
+

@@ -1,6 +1,7 @@
 import { Table, Tag, Space, Button, Input, DatePicker, Select } from 'antd'
 import { SearchOutlined, FilterOutlined } from '@ant-design/icons'
 import { useState } from 'react'
+import { useStore } from '../../hooks/useStore'
 
 const { RangePicker } = DatePicker
 
@@ -16,6 +17,7 @@ function DataTable({
   rowKey = 'id',
 }) {
   const [searchText, setSearchText] = useState('')
+  const globalSearchQuery = useStore((state) => state.searchQuery) || ''
   const [paginationState, setPaginationState] = useState({
     current: 1,
     pageSize: pagination?.pageSize || 10,
@@ -25,11 +27,12 @@ function DataTable({
     setSearchText(e.target.value)
   }
 
-  const filteredData = data.filter((item) =>
-    Object.values(item).some((val) =>
-      String(val).toLowerCase().includes(searchText.toLowerCase())
+  const filteredData = data.filter((item) => {
+    const query = (searchText || globalSearchQuery).toLowerCase()
+    return Object.values(item).some((val) =>
+      String(val).toLowerCase().includes(query)
     )
-  )
+  })
 
   return (
     <div className="premium-card overflow-hidden">

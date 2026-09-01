@@ -26,6 +26,8 @@ import BarChart from '../components/charts/BarChart'
 import AreaChart from '../components/charts/AreaChart'
 import Badge from '../components/common/Badge'
 import { useStore } from '../hooks/useStore'
+import { Button } from 'antd'
+import { RefreshCw } from 'lucide-react'
 
 const pageVariants = {
   initial: { opacity: 0, y: 12, filter: 'blur(4px)' },
@@ -43,7 +45,7 @@ const itemVariants = {
 }
 
 function Dashboard() {
-  const { stats, leadsBySource, campaigns, leads, workflows, painPoints, quotations, fieldSales, onboarding, testimonials, syncData } = useStore()
+  const { stats, leadsBySource, campaigns, leads, workflows, painPoints, quotations, fieldSales, onboarding, testimonials, syncData, manualRefresh, initialLoading } = useStore()
   
   const leadAcquisitionData = [
     { name: '1st week', value: 30 },
@@ -79,6 +81,25 @@ function Dashboard() {
       exit="exit"
       className="p-4 md:p-6 lg:p-8 space-y-6"
     >
+      {/* Page Header with Refresh */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500">Marketing performance overview</p>
+        </div>
+        <Button
+          icon={<RefreshCw className="w-4 h-4" />}
+          onClick={async () => {
+            await manualRefresh()
+            message.success('Data refreshed')
+          }}
+          loading={initialLoading}
+          className="rounded-xl"
+        >
+          Refresh
+        </Button>
+      </div>
+
       {/* Top Status Cards */}
       <motion.div variants={containerVariants} initial="initial" animate="animate" className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <motion.div variants={itemVariants} className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-5">

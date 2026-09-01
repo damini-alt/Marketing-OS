@@ -68,6 +68,15 @@ const Login = ({ onLogin }) => {
         setTimeout(() => {
           if (username === 'admin' && password === 'admin') {
             localStorage.setItem('isAuth', 'true');
+            localStorage.setItem('userRole', 'admin');
+            localStorage.setItem('adminName', 'Admin');
+            localStorage.setItem('adminEmail', 'admin@pucho.ai');
+            onLogin();
+          } else if (username === 'executive' && password === 'executive') {
+            localStorage.setItem('isAuth', 'true');
+            localStorage.setItem('userRole', 'executive');
+            localStorage.setItem('adminName', 'Marketing Executive');
+            localStorage.setItem('adminEmail', 'executive@pucho.ai');
             onLogin();
           } else {
             setError('Invalid credentials! Please select from the Demo Account dropdown above.');

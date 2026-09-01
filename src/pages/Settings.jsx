@@ -25,7 +25,8 @@ function Settings() {
   const { 
     settings, updateSettings, syncData, loading, 
     workflows, painPoints, toggleWorkflow, togglePainPoint,
-    profile, updateProfile
+    profile, updateProfile,
+    integrationSettings, integrationLogs, updateIntegrationSettings, simulateWebhookLead
   } = useStore()
   const [form] = Form.useForm()
   const [saving, setSaving] = useState(false)
@@ -134,6 +135,17 @@ function Settings() {
         >
           <Link className="w-4 h-4" />
           Webhooks
+        </button>
+        <button
+          onClick={() => setActiveTab('integrations')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm whitespace-nowrap transition-all ${
+            activeTab === 'integrations'
+              ? 'bg-primary text-white shadow-lg'
+              : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <FlaskConical className="w-4 h-4" />
+          Integrations Hub
         </button>
       </div>
 
@@ -465,6 +477,271 @@ function Settings() {
               </div>
             </Card>
           </Form>
+        </motion.div>
+      )}
+
+      {/* Integrations Hub Tab */}
+      {activeTab === 'integrations' && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-6"
+        >
+          {/* Integrations Configuration */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Columns - Settings */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="shadow-subtle border border-gray-100 rounded-2xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-primary-50 rounded-lg">
+                    <FlaskConical className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Lead Aggregator Configuration</h3>
+                    <p className="text-sm text-gray-500">Configure multi-channel webhook listeners</p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Meta Ads Integration */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                      <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                        Facebook & Instagram Lead Ads
+                      </h4>
+                      <p className="text-xs text-gray-500">Capture leads from Facebook/Instagram forms in real-time</p>
+                      <div className="mt-2 text-xs text-gray-400 font-mono">
+                        Webhook URL: <span className="text-gray-600 bg-white px-1.5 py-0.5 rounded border border-gray-200 select-all cursor-pointer">https://studio.pucho.ai/api/v1/webhooks/tXsAclaOxsKMK24WhWTdR</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <Switch 
+                        checked={integrationSettings.meta} 
+                        onChange={(checked) => updateIntegrationSettings({ meta: checked })} 
+                      />
+                      <span className="text-[10px] text-gray-400 font-medium">Verification Token: {integrationSettings.metaVerificationToken}</span>
+                    </div>
+                  </div>
+
+                  {/* IndiaMART Integration */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">IndiaMART Leads</h4>
+                      <p className="text-xs text-gray-500">Ingest B2B marketplace leads automatically via CRM API key</p>
+                      <div className="mt-2 flex gap-3 items-center">
+                        <span className="text-xs text-gray-500">CRM Key:</span>
+                        <Input.Password 
+                          value={integrationSettings.indiamartApiKey} 
+                          onChange={(e) => updateIntegrationSettings({ indiamartApiKey: e.target.value })} 
+                          className="w-48 h-8 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <Switch 
+                      checked={integrationSettings.indiamart} 
+                      onChange={(checked) => updateIntegrationSettings({ indiamart: checked })} 
+                    />
+                  </div>
+
+                  {/* TradeIndia Integration */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">TradeIndia Leads</h4>
+                      <p className="text-xs text-gray-500">Pull TradeIndia buy lead inquiries using trade credentials</p>
+                      <div className="mt-2 flex gap-3 items-center">
+                        <span className="text-xs text-gray-500">API Key:</span>
+                        <Input.Password 
+                          value={integrationSettings.tradeindiaApiKey} 
+                          onChange={(e) => updateIntegrationSettings({ tradeindiaApiKey: e.target.value })} 
+                          className="w-48 h-8 text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <Switch 
+                      checked={integrationSettings.tradeindia} 
+                      onChange={(checked) => updateIntegrationSettings({ tradeindia: checked })} 
+                    />
+                  </div>
+
+                  {/* Google Forms Integration */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Google Forms</h4>
+                      <p className="text-xs text-gray-500">Append leads submitted from custom landing page forms</p>
+                      <div className="mt-2 text-xs text-gray-400 font-mono">
+                        Webhook Endpoint: <span className="text-gray-600 bg-white px-1.5 py-0.5 rounded border border-gray-200 select-all cursor-pointer">https://api.pucho.ai/api/v1/leads/webhook</span>
+                      </div>
+                    </div>
+                    <Switch 
+                      checked={integrationSettings.google_forms} 
+                      onChange={(checked) => updateIntegrationSettings({ google_forms: checked })} 
+                    />
+                  </div>
+
+                  {/* WhatsApp Integration */}
+                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                      <h4 className="font-semibold text-gray-900">WhatsApp Lead Capture</h4>
+                      <p className="text-xs text-gray-500">Automatically register incoming customer messages as leads</p>
+                    </div>
+                    <Switch 
+                      checked={integrationSettings.whatsapp} 
+                      onChange={(checked) => updateIntegrationSettings({ whatsapp: checked })} 
+                    />
+                  </div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Right Column - Simulator */}
+            <div className="col-span-1">
+              <Card className="shadow-subtle border border-gray-100 rounded-2xl h-full flex flex-col">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 bg-amber-50 rounded-lg">
+                    <Bug className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Simulator Panel</h3>
+                    <p className="text-sm text-gray-500">Simulate incoming webhook events</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 flex-1">
+                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 text-xs text-amber-800 space-y-2">
+                    <p className="font-semibold">Bypassing Webhook Gateways</p>
+                    <p>Triggering simulations tests deduplication algorithms, UTM parsers, and timeline drawer events locally.</p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      simulateWebhookLead({
+                        name: 'Aarav Mehta',
+                        phone: '9811223344',
+                        email: 'aarav.mehta@gmail.com',
+                        source: 'Facebook Ads',
+                        utm_source: 'facebook',
+                        utm_medium: 'cpc',
+                        utm_campaign: 'monsoon_clearance_sale',
+                        utm_content: 'carousel_v1',
+                        message: 'Interested in retail stock discounts.'
+                      });
+                      message.success('Simulated Meta Lead posted successfully!');
+                    }}
+                    className="w-full py-2.5 bg-primary hover:bg-[#4a211b] text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"
+                  >
+                    Simulate New Meta Lead (Aarav Mehta)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      simulateWebhookLead({
+                        name: 'Aarav Mehta',
+                        phone: '9811223344',
+                        email: 'aarav.mehta@gmail.com',
+                        source: 'Instagram Ads',
+                        utm_source: 'instagram',
+                        utm_medium: 'cpc',
+                        utm_campaign: 'instagram_reengage_2026',
+                        utm_content: 'image_ad_v2',
+                        message: 'Re-submitting form on Instagram'
+                      });
+                      message.warning('Simulated Duplicate Lead posted!');
+                    }}
+                    className="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"
+                  >
+                    Simulate Duplicate Lead (Re-engages Aarav)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      simulateWebhookLead({
+                        name: 'Karan Malhotra',
+                        phone: '9900112233',
+                        email: 'karan@malhotragroup.in',
+                        source: 'IndiaMART',
+                        utm_source: 'indiamart',
+                        utm_medium: 'referral',
+                        utm_campaign: 'enterprise_hvac',
+                        message: 'Bulk HVAC enquiry for CP commercial building.'
+                      });
+                      message.success('Simulated IndiaMART Lead posted!');
+                    }}
+                    className="w-full py-2.5 bg-[#5d2a23]/80 hover:bg-[#5d2a23] text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"
+                  >
+                    Simulate IndiaMART Lead (Karan)
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      simulateWebhookLead({
+                        name: 'Simran Sethi',
+                        phone: '9820011223',
+                        email: 'simran.sethi@gmail.com',
+                        source: 'Google Forms',
+                        utm_source: 'google_forms',
+                        utm_medium: 'organic',
+                        utm_campaign: 'monsoon_clearance_sale',
+                        message: 'Interested in festive schemes.'
+                      });
+                      message.success('Simulated Google Form Lead posted!');
+                    }}
+                    className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-md active:scale-95"
+                  >
+                    Simulate Google Form Lead (Simran)
+                  </button>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          {/* Webhook logs */}
+          <Card className="shadow-subtle border border-gray-100 rounded-2xl">
+            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Database className="w-5 h-5 text-gray-400" />
+              Live Ingestion & Webhook Logs
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Timestamp</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Source</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Payload</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Type</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {integrationLogs.map((log) => (
+                    <tr key={log.id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs font-semibold text-gray-900">
+                        {log.source}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                        <span className="font-mono bg-gray-100 px-2 py-1 rounded select-all cursor-pointer" title={JSON.stringify(log.payload)}>
+                          {log.payload.name} ({log.payload.phone})
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs">
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${
+                          log.status === 'success' ? 'bg-green-100 text-green-700' :
+                          log.status === 'duplicate' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                        }`}>
+                          {log.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500">
+                        {log.type || 'N/A'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         </motion.div>
       )}
     </motion.div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Edit, Trash2, Eye, MoreVertical, Filter, Download, Megaphone, Users, TrendingUp, Calendar, Radio, RefreshCw } from 'lucide-react'
-import { Button, Dropdown, Menu, message, Popconfirm, Tooltip } from 'antd'
+import { Plus, Edit, Trash2, Eye, MoreVertical, Filter, Download, Megaphone, Users, TrendingUp, Calendar, Radio, RefreshCw, LayoutGrid, List } from 'lucide-react'
+import { Button, Dropdown, Menu, message, Popconfirm, Tooltip, Popover, Select as AntSelect } from 'antd'
 import { Form, Input, Select, InputNumber, DatePicker } from 'antd'
 import StatCard from '../components/common/StatCard'
 import DataTable from '../components/common/DataTable'
@@ -18,7 +18,7 @@ const pageVariants = {
 }
 
 function Campaigns() {
-  const { campaigns, leads, addCampaign, updateCampaign, loading, deleteCampaign } = useStore()
+  const { campaigns, leads, addCampaign, updateCampaign, loading, deleteCampaign, initialLoading } = useStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [previewImage, setPreviewImage] = useState(null)
@@ -26,6 +26,7 @@ function Campaigns() {
   const [form] = Form.useForm()
   const [filterStatus, setFilterStatus] = useState(null)
   const [filterType, setFilterType] = useState(null)
+  const [viewMode, setViewMode] = useState('table')
 
   const stats = {
     total: campaigns.length,
@@ -49,7 +50,25 @@ function Campaigns() {
       dataIndex: 'campaign_name',
       key: 'campaign_name',
       sorter: (a, b) => a.campaign_name.localeCompare(b.campaign_name),
-      render: (text) => <span className="font-semibold text-gray-900">{text}</span>,
+      render: (text, record) => {
+        const content = (
+          <div className="max-w-xs">
+            <span className="font-semibold text-gray-900">{text}</span>
+            {record.description && (
+              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{record.description}</p>
+            )}
+          </div>
+        )
+        if (!record.description) return content
+        return (
+          <Popover
+            content={<div className="max-w-sm text-sm text-gray-600">{record.description}</div>}
+            title={<span className="font-semibold">{text}</span>}
+          >
+            {content.props.children ? <div className="cursor-pointer">{content}</div> : content}
+          </Popover>
+        )
+      },
     },
     {
       title: 'Type',
@@ -254,11 +273,24 @@ function Campaigns() {
             options={[
               { value: 'all', label: 'All Types' },
               { value: 'festival', label: 'Festival' },
+              { value: 'festival_sale', label: 'Festival Sale' },
               { value: 'product', label: 'Product' },
               { value: 'discount', label: 'Discount' },
               { value: 'branding', label: 'Branding' },
+              { value: 'dealer_scheme', label: 'Dealer Scheme' },
+              { value: 'amc', label: 'AMC' },
+              { value: 'onboarding', label: 'Onboarding' },
+              { value: 'quotes', label: 'Quotes' },
             ]}
           />
+          <Button
+            size="default"
+            icon={viewMode === 'table' ? <LayoutGrid className="w-4 h-4" /> : <List className="w-4 h-4" />}
+            onClick={() => setViewMode(viewMode === 'table' ? 'grid' : 'table')}
+            className="rounded-xl"
+          >
+            {viewMode === 'table' ? 'Grid' : 'Table'}
+          </Button>
           <Button
             type="primary"
             icon={<Plus className="w-4 h-4" />}
@@ -270,9 +302,61 @@ function Campaigns() {
         </div>
       </div>
 
-      {/* Table */}
-      {loading ? (
+      {/* Table / Grid */}
+      {initialLoading ? (
         <Skeleton variant="table" />
+      ) : viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredCampaigns.map((campaign) => {
+            const leadCount = leads.filter((l) => l.campaign_id === campaign.campaign_id).length
+            return (
+              <motion.div
+                key={campaign.campaign_id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all"
+              >
+                {campaign.image_url ? (
+                  <div className="h-36 bg-gray-100 overflow-hidden cursor-pointer" onClick={() => { setPreviewImage(campaign.image_url); setIsPreviewOpen(true) }}>
+                    <img src={campaign.image_url} alt={campaign.campaign_name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                  </div>
+                ) : (
+                  <div className={`h-36 flex items-center justify-center ${campaign.status === 'active' ? 'bg-gradient-to-br from-green-50 to-emerald-100' : campaign.status === 'planned' ? 'bg-gradient-to-br from-purple-50 to-indigo-100' : 'bg-gradient-to-br from-gray-50 to-slate-100'}`}>
+                    <Megaphone className={`w-12 h-12 ${campaign.status === 'active' ? 'text-green-400' : campaign.status === 'planned' ? 'text-purple-400' : 'text-gray-400'}`} />
+                  </div>
+                )}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge status={campaign.campaign_type} size="sm" />
+                    <Badge status={campaign.status} size="sm" />
+                  </div>
+                  <h4 className="font-semibold text-gray-900 mb-1 line-clamp-1">{campaign.campaign_name}</h4>
+                  {campaign.description && (
+                    <Tooltip title={campaign.description}>
+                      <p className="text-xs text-gray-400 line-clamp-2 mb-3 italic">{campaign.description}</p>
+                    </Tooltip>
+                  )}
+                  <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{campaign.start_date}</span>
+                    <span className="flex items-center gap-1"><Users className="w-3 h-3" />{leadCount} leads</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                    <span className="font-semibold text-gray-900 text-sm">₹{campaign.budget?.toLocaleString('en-IN')}</span>
+                    <div className="flex gap-1">
+                      <Button type="text" size="small" icon={<Edit className="w-3.5 h-3.5" />} onClick={() => handleEdit(campaign)} />
+                      {campaign.image_url && (
+                        <Button type="text" size="small" icon={<Eye className="w-3.5 h-3.5" />} onClick={() => { setPreviewImage(campaign.image_url); setIsPreviewOpen(true) }} />
+                      )}
+                      <Popconfirm title="Delete this campaign?" onConfirm={() => handleDelete(campaign.campaign_id, campaign.row_number)} okText="Yes" cancelText="No">
+                        <Button type="text" size="small" danger icon={<Trash2 className="w-3.5 h-3.5" />} />
+                      </Popconfirm>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
       ) : (
         <DataTable
           columns={columns}
@@ -311,9 +395,14 @@ function Campaigns() {
             >
               <Select placeholder="Select type" size="large">
                 <Select.Option value="festival">Festival</Select.Option>
+                <Select.Option value="festival_sale">Festival Sale</Select.Option>
                 <Select.Option value="product">Product Launch</Select.Option>
                 <Select.Option value="discount">Discount/Offer</Select.Option>
                 <Select.Option value="branding">Branding</Select.Option>
+                <Select.Option value="dealer_scheme">Dealer Scheme</Select.Option>
+                <Select.Option value="amc">AMC Campaign</Select.Option>
+                <Select.Option value="onboarding">Onboarding</Select.Option>
+                <Select.Option value="quotes">Quotes Campaign</Select.Option>
               </Select>
             </Form.Item>
           </div>
@@ -377,6 +466,18 @@ function Campaigns() {
                 { value: 'Google Ads', label: 'Google Ads' },
                 { value: 'LinkedIn', label: 'LinkedIn' },
               ]}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Description"
+          >
+            <Input.TextArea
+              placeholder="Detailed description of the campaign goals, strategies, and expected outcomes..."
+              rows={3}
+              showCount
+              maxLength={500}
             />
           </Form.Item>
 

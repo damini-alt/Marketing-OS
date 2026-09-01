@@ -30,6 +30,135 @@
   @apply bg-gradient-to-br from-primary to-primary-700;
 }
 
+/* Sentiment Analysis Page */
+.sa-card {
+  background: #ffffff;
+  border: 1px solid #ECEEF5;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+  transition: all 300ms ease-in-out;
+}
+
+.sa-card:hover {
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+.sa-card-hero {
+  background: #ffffff;
+  border: 1px solid #ECEEF5;
+  border-radius: 24px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+}
+
+.sa-page-bg {
+  background: #F7F8FC;
+}
+
+.sa-text-primary {
+  color: #1F2937;
+}
+
+.sa-text-secondary {
+  color: #8D95A9;
+}
+
+.sa-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+
+.sa-progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #F1F5F9;
+  overflow: hidden;
+}
+
+.sa-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sa-badge-purple {
+  background: rgba(124, 77, 255, 0.1);
+  color: #7C4DFF;
+  border: 1px solid rgba(124, 77, 255, 0.2);
+}
+
+.sa-badge-red {
+  background: #FEECEC;
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+.sa-badge-yellow {
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.sa-badge-blue {
+  background: #DBEAFE;
+  color: #1D4ED8;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.sa-badge-green {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.sa-badge-amber {
+  background: #FEF3C7;
+  color: #B45309;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.sa-badge-gray {
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+}
+
+.sa-sticky-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #FAFBFD;
+}
+
+.sa-row-hover:hover {
+  background: #FAFBFD;
+}
+
+@keyframes saFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sa-fade-in {
+  animation: saFadeInUp 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes saDrawBar {
+  from {
+    width: 0;
+  }
+}
+
+.sa-draw-bar {
+  animation: saDrawBar 1100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Ant Design Global Overrides - Modern SaaS Look */
 .ant-btn {
   @apply rounded-xl font-bold h-11 px-6 flex items-center justify-center transition-all duration-200 border-slate-200 text-slate-600 !important;

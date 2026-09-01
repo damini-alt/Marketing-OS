@@ -23,7 +23,7 @@ const segmentOptions = [
 ]
 
 function Broadcast() {
-  const { broadcasts, campaigns, leads, addBroadcast, updateBroadcast, deleteBroadcast, sendBroadcastNow, loading } = useStore()
+  const { broadcasts, campaigns, leads, addBroadcast, updateBroadcast, deleteBroadcast, sendBroadcastNow, loading, initialLoading } = useStore()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingBroadcast, setEditingBroadcast] = useState(null)
   const [form] = Form.useForm()
@@ -301,7 +301,7 @@ function Broadcast() {
       </div>
 
       {/* Broadcast Table */}
-      {loading ? (
+      {initialLoading ? (
         <Skeleton variant="table" />
       ) : (
         <DataTable
